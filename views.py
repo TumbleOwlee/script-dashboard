@@ -149,11 +149,9 @@ def enable_service(id, enable: bool):
             config = yaml.load(f, yaml.FullLoader)
             if config['scheduling'] == 'systemd':
                 service_file = f"{username}_{id}.service"
-                print('enable' if enable else "disable")
                 if not enable:
                     SYSTEM_SHELL.run([['systemctl', 'stop', service_file.lower()]])
                 returncode, output = SYSTEM_SHELL.check_output(['systemctl', 'enable' if enable else "disable", service_file.lower()])
-                print(output)
                 if returncode == 0:
                     return {'id': id, 'success': True}
                 else:
@@ -190,7 +188,6 @@ def start_service(id, start: bool):
             config = yaml.load(f, yaml.FullLoader)
             if config['scheduling'] == 'systemd':
                 service_file = f"{username}_{id}.service"
-                print(['systemctl', 'start' if start else "stop", service_file.lower()])
                 returncode, output = SYSTEM_SHELL.check_output(['systemctl', 'start' if start else "stop", service_file.lower()])
                 if returncode == 0:
                     return {'id': id, 'success': True}

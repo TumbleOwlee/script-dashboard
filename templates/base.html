@@ -31,45 +31,49 @@
             });
         }
 
+        function check_status_of_element(elem) {
+            ((elem) => {
+                get("/status/" + elem.id).then((data) => {
+                    elem.innerHTML = "";
+                    const obj = JSON.parse(data);
+                    if (obj.active == "active") {
+                        const template = document.querySelector("#status-active");
+                        const clone = template.content.cloneNode(true);
+                        elem.appendChild(clone);
+                        var startStop = document.getElementById(elem.id + "-start")
+                        if (startStop != null) {
+                            startStop.innerHTML = "Stop"
+                            startStop.disabled = false
+                        }
+                    } else if (obj.status == "failed") {
+                        const template = document.querySelector("#status-failed");
+                        const clone = template.content.cloneNode(true);
+                        elem.appendChild(clone);
+                        var startStop = document.getElementById(elem.id + "-start")
+                        if (startStop != null) {
+                            startStop.innerHTML = "Start"
+                            startStop.disabled = false
+                        }
+                    } else { // inactive
+                        const template = document.querySelector("#status-inactive");
+                        const clone = template.content.cloneNode(true);
+                        elem.appendChild(clone);
+                        var startStop = document.getElementById(elem.id + "-start")
+                        if (startStop != null) {
+                            startStop.innerHTML = "Start"
+                            startStop.disabled = false
+                        }
+                    }
+                    document.getElementById("checkbox-" + elem.id).checked = (obj.enable == "enabled");
+                }).catch((err) => {});
+            })(elem);
+        }
+
         function check_status() {
             var elements = document.getElementsByClassName("script-status");
             for (var i = 0; i < elements.length; ++i) {
                 var elem = elements[i];
-                ((elem) => {
-                    get("/status/" + elem.id).then((data) => {
-                        elem.innerHTML = "";
-                        const obj = JSON.parse(data);
-                        if (obj.active == "active") {
-                            const template = document.querySelector("#status-active");
-                            const clone = template.content.cloneNode(true);
-                            elem.appendChild(clone);
-                            var startStop = document.getElementById(elem.id + "-start")
-                            if (startStop != null) {
-                                startStop.innerHTML = "Stop"
-                                startStop.disabled = false
-                            }
-                        } else if (obj.status == "failed") {
-                            const template = document.querySelector("#status-failed");
-                            const clone = template.content.cloneNode(true);
-                            elem.appendChild(clone);
-                            var startStop = document.getElementById(elem.id + "-start")
-                            if (startStop != null) {
-                                startStop.innerHTML = "Start"
-                                startStop.disabled = false
-                            }
-                        } else { // inactive
-                            const template = document.querySelector("#status-inactive");
-                            const clone = template.content.cloneNode(true);
-                            elem.appendChild(clone);
-                            var startStop = document.getElementById(elem.id + "-start")
-                            if (startStop != null) {
-                                startStop.innerHTML = "Start"
-                                startStop.disabled = false
-                            }
-                        }
-                        document.getElementById("checkbox-" + elem.id).checked = (obj.enable == "enabled");
-                    }).catch((err) => {});
-                })(elem);
+                check_status_of_element(elem)
             }
         }
 
@@ -82,7 +86,12 @@
                 } else {
                     elem.checked = (obj.success) ? true : false;
                 }
-                check_status()
+                var elements = document.getElementsByClassName("script-status");
+                for (var i = 0; i < elements.length; ++i) {
+                    if (elements[i].id == id) {
+                        check_status_of_element(elements[i])
+                    }
+                }
             }).catch((err) => {});
         }
 
@@ -95,7 +104,12 @@
             ((elem, op) => {
                 get("/" + op + "/" + elem.name).then((data) => {
                     console.log(data)
-                    check_status()
+                    var elements = document.getElementsByClassName("script-status");
+                    for (var i = 0; i < elements.length; ++i) {
+                        if (elements[i].id == elem.name) {
+                            check_status_of_element(elements[i])
+                        }
+                    }
                 }).catch((err) => {});
             })(elem, value.toLowerCase())
         }
