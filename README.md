@@ -1,2 +1,3 @@
-# script-dashboard
-Simple dashboard to manage script deployments.
+# Script Dashboard
+
+This repository contains a simple script management dashboard created using [Flask]() and [Tailwindcss]().
