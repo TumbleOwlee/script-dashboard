@@ -1,0 +1,521 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {% if config['name'] == '' %}
+        Dashboard - New Script
+    {% else %}
+        Dashboard - {{ config['name'] }}
+    {% endif %}
+{% endblock %}
+
+{% block head %}
+<script>
+    function click_next_sibling(elem) {
+        elem.nextElementSibling.click()
+    }
+
+    function update_file_list() {
+        var elem = document.getElementById('files');
+        var list = document.getElementById('files-list');
+        for (var i = 0; i < elem.files.length; ++i) {
+            var alreadyPresent = false;
+            for (var j = 0; j < list.children.length; ++j) {
+                if (list.children[j].id == elem.files[i].name) {
+                    alreadyPresent = true;
+                    break;
+                }
+            }
+            if (!alreadyPresent) {
+                console.log("Step1")
+                var container = document.createElement('div')
+                container.id = elem.files[i].name
+                container.classList.add('flex', 'flex-row', 'h-8', 'shrink-0', 'items-center', 'bg-stone-900', 'border', 'border-stone-600', 'justify-center', 'px-3', 'gap-2')
+                console.log("Step2")
+                // Create button to remove from list
+                var button = document.createElement('button')
+                button.classList.add('w-4', 'h-full')
+                button.onclick = function() {
+                    this.parentElement.remove()
+                }
+                console.log("Step3")
+                const template = document.querySelector('#close-icon');
+                const clone = template.content.cloneNode(true);
+                button.appendChild(clone);
+                container.appendChild(button);
+                // Create text label to show filename
+                var div = document.createElement('div');
+                div.id = elem.files[i].name + '-text';
+                div.innerHTML = elem.files[i].name;;
+                div.classList.add('text-xs');
+                container.appendChild(div);
+                list.appendChild(container);
+            }
+        }
+    }
+
+    function add_env_variable() {
+        const template = document.querySelector('#env-var');
+        const clone = template.content.cloneNode(true);
+        let btn = clone.querySelector("button");
+        btn.onclick = function() {
+            this.parentElement.remove();
+        }
+
+        const tbody = document.querySelector("#env-list");
+        tbody.appendChild(clone);
+    }
+
+    function show_crontab_details(elem) {
+        var p = elem.parentElement;
+        p.firstElementChild.value = "crontab"
+        for (var i = 0; i < p.children.length; ++i) {
+            p.children[i].classList.remove('bg-blue-900');
+            p.children[i].classList.add('bg-stone-900');
+        }
+        elem.classList.remove('bg-stone-900');
+        elem.classList.add('bg-blue-900');
+
+        var container = document.querySelector('#execution-content');
+        container.innerHTML = '';
+        const template = document.querySelector('#crontab-details');
+        const clone = template.content.cloneNode(true);
+        container.appendChild(clone)
+    }
+
+    function show_systemd_details(elem) {
+        var p = elem.parentElement;
+        p.firstElementChild.value = "systemd"
+        for (var i = 0; i < p.children.length; ++i) {
+            p.children[i].classList.remove('bg-blue-900');
+            p.children[i].classList.add('bg-stone-900');
+        }
+        elem.classList.remove('bg-stone-900');
+        elem.classList.add('bg-blue-900');
+
+        var container = document.querySelector('#execution-content');
+        container.innerHTML = '';
+        const template = document.querySelector('#systemd-details');
+        const clone = template.content.cloneNode(true);
+        container.appendChild(clone)
+    }
+
+    function show_no_details(elem) {
+        var p = elem.parentElement;
+        p.firstElementChild.value = "none"
+        for (var i = 0; i < p.children.length; ++i) {
+            p.children[i].classList.remove('bg-blue-900');
+            p.children[i].classList.add('bg-stone-900');
+        }
+        elem.classList.remove('bg-stone-900');
+        elem.classList.add('bg-blue-900');
+
+        var container = document.querySelector('#execution-content');
+        container.innerHTML = '';
+
+        const template = document.querySelector('#no-details');
+        const clone = template.content.cloneNode(true);
+        container.appendChild(clone)
+    }
+
+    function update_service_file(elem) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            var elem = document.querySelector('#systemd-service')
+            elem.value = e.target.result
+        };
+        reader.readAsText(elem.files[0])
+    }
+
+    function add_env_from_file(elem) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            var content = e.target.result;
+            console.log(content)
+
+            var regex = /^\s*([\w_]+)\s*=\s*(['"]?)([\w_])+(['"]?)/gm;
+            var matches = [...content.matchAll(regex)];
+
+            for (var i = 0; i < matches.length; ++i) {
+                if (matches[i][2] != matches[i][4]) {
+                    continue;
+                }
+
+                const template = document.querySelector('#env-var');
+                const clone = template.content.cloneNode(true);
+                let btn = clone.querySelector("button");
+                btn.onclick = function() {
+                    this.parentElement.remove();
+                }
+                var env_name_input = clone.querySelector('.env-name')
+                env_name_input.value = matches[i][1]
+                var env_value_input = clone.querySelector('.env-value')
+                env_value_input.value = matches[i][3]
+
+                const tbody = document.querySelector("#env-list");
+                tbody.appendChild(clone);
+            }
+            elem.value = null
+        };
+        reader.readAsText(elem.files[0])
+    }
+
+    {% if "scheduling" in config and config["scheduling"] == "systemd" %}
+        document.addEventListener("DOMContentLoaded", function(){
+            show_systemd_details(document.querySelector("#systemd-btn"))
+        });
+    {% elif "scheduling" in config and config["scheduling"] == "crontab" %}
+        document.addEventListener("DOMContentLoaded", function(){
+            show_crontab_details(document.querySelector("#crontab-btn"))
+        });
+    {% elif "scheduling" in config and config["scheduling"] == "none" %}
+        document.addEventListener("DOMContentLoaded", function(){
+            show_no_details(document.querySelector("#none-btn"))
+        });
+    {% endif %}
+
+    function add_argument_to_list(ev, elem) {
+        if (ev.key == "Enter") {
+            if (elem.value != '') {
+                let argument = elem.value
+                const template = document.querySelector('#argument');
+                const clone = template.content.cloneNode(true);
+                let button = clone.querySelector('button');
+                button.innerHTML = argument;
+                let input = clone.querySelector('input');
+                input.value = argument;
+                document.querySelector('#args-list').appendChild(clone);
+                elem.value = ''
+            }
+        }
+    }
+
+    var refreshCounter = 1
+    function update_refresh() {
+        refreshCounter -= 1;
+        if (refreshCounter == 0) {
+            get_log();
+            refreshCounter = 30;
+        }
+        document.getElementById("refresh-text").innerHTML = "Refresh in " + refreshCounter + "s";
+    }
+
+    function get_log() {
+        const url = '/log/{{ config["oldName"] }}'
+        get(url).then((data) => {
+            document.getElementById("log-spinner").classList.add('hidden')
+            const obj = JSON.parse(data)
+            var elem = document.getElementById("log-textarea")
+            var elemHeader = document.getElementById("log-header")
+            var elemRefresh = document.getElementById("refresh-container")
+            if (obj.log != "") {
+                elem.innerHTML = obj.log
+                elem.classList.remove("hidden")
+                elemHeader.classList.remove("hidden")
+                elemRefresh.classList.remove("hidden")
+            } else {
+                elem.innerHTML = ""
+                elem.classList.add("hidden")
+                elemHeader.classList.add("hidden")
+                elemRefresh.classList.add("hidden")
+            }
+        }).catch((err) => {});
+    }
+
+    document.addEventListener("DOMContentLoaded", function(){
+        var logUpdate = window.setInterval(update_refresh, 1000)
+    });
+</script>
+{% endblock %}
+
+{% block content %}
+
+<template id='argument'>
+    <div>
+        <button type='button' class="flex justify-center hover:line-through hover:text-red-400 items-center px-2 h-8 bg-stone-900  border-stone-600 border text-xs" onclick="this.parentElement.remove();"></button>
+        <input style="font-family: monospace" class="hidden" type="text" name="cli-args" value="">
+    </div>
+</template>
+
+<template id="close-icon">
+    <svg class="w-4 h-4 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 20">
+        <path d="M17 4h-4V2a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v2H1a1 1 0 0 0 0 2h1v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V6h1a1 1 0 1 0 0-2ZM7 2h4v2H7V2Zm1 14a1 1 0 1 1-2 0V8a1 1 0 0 1 2 0v8Zm4 0a1 1 0 0 1-2 0V8a1 1 0 0 1 2 0v8Z"/>
+    </svg>
+</template>
+
+<template id="env-var">
+    <div class="w-full flex flex-row gap-4 justify-center items-center">
+        <input style="font-family: monospace" class="env-name flex grow shrink px-2 h-8 bg-stone-900  border-stone-600 border text-xs" type="text" name="env_name" placeholder="VARIABLE">
+        <input style="font-family: monospace" class="env-value flex grow shrink px-2 h-8 bg-stone-900  border-stone-600 border text-xs" type="text" name="env_value" placeholder="VALUE">
+        <button type="button" onclick="this.parentElement.remove();">
+            <svg class="w-4 h-4 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 20">
+                <path d="M17 4h-4V2a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v2H1a1 1 0 0 0 0 2h1v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V6h1a1 1 0 1 0 0-2ZM7 2h4v2H7V2Zm1 14a1 1 0 1 1-2 0V8a1 1 0 0 1 2 0v8Zm4 0a1 1 0 0 1-2 0V8a1 1 0 0 1 2 0v8Z"/>
+            </svg>
+        </button>
+    </div>
+</template>
+
+<template id="no-details">
+    <div class='pt-4 w-full'>
+        <button type='button' onclick="click_next_sibling(this)"
+            class="flex flex-row grow h-full  bg-stone-900 justify-center items-center hover:bg-blue-900 border border-stone-600 gap-2 w-full" >
+            <div class="flex flex-row w-10 h-10 items-center justify-center">
+                <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 21 16">
+                    <path d="M11 16a1 1 0 0 1-1-1v-1h2v1a1 1 0 0 1-1 1Z"/>
+                    <path d="M17.989 6.124a6.5 6.5 0 0 0-12.495-2.1A5 5 0 0 0 6 14h4V8.414l-.293.293a1 1 0 0 1-1.414-1.414l2-2a1 1 0 0 1 1.414 0l2 2a1 1 0 1 1-1.414 1.414L12 8.414V14h5a4 4 0 0 0 .989-7.876Z"/>
+                </svg>
+            </div>
+            <div>Save / Update</div>
+        </button>
+        <input style="font-family: monospace" type="submit" class='hidden'/>
+    </div>
+</template>
+
+<template id="crontab-details">
+    <div class="flex flex-col w-full bg-stone-900  border border-stone-600 p-4">
+        <div class="pb-1 flex w-full flex-none grow-0 shrink-0 text-blue-400">Time of execution</div>
+        <div class="flex flex-row w-full flex-wrap flex-evenly">
+            <div class="flex flex-row justify-center items-center shrink-0 p-4">
+                <label for="minute" class="flex flex-none shrink-0 grow-0 w-20 text-sm">Minute</label>
+                <input style="font-family: monospace" class="flex grow shrink px-2 h-8 bg-stone-800  border-stone-600 border text-xs" type="text" id="minute" name="minute" placeholder="{0-59, *}" value="{{ config['crontab']['minute'] if 'crontab' in config else '' }}">
+            </div>
+            <div class="flex flex-row justify-center items-center shrink-0 p-4">
+                <label for="hour" class="flex flex-none shrink-0 grow-0 w-20 text-sm">Hour</label>
+                <input style="font-family: monospace" class="flex grow shrink px-2 h-8 bg-stone-800  border-stone-600 border text-xs" type="text" id="hour" name="hour" placeholder="{0-23, *}" value="{{ config['crontab']['hour'] if 'crontab' in config else '' }}">
+            </div>
+            <div class="flex flex-row justify-center items-center shrink-0 p-4">
+                <label for="day" class="flex flex-none shrink-0 grow-0 w-20 text-sm">Day</label>
+                <input style="font-family: monospace" class="flex grow shrink px-2 h-8 bg-stone-800  border-stone-600 border text-xs" type="text" id="day" name="day" placeholder="{1-31, *}" value="{{ config['crontab']['day'] if 'crontab' in config else ''}}">
+            </div>
+            <div class="flex flex-row justify-center items-center shrink-0 p-4">
+                <label for="month" class="flex flex-none shrink-0 grow-0 w-20 text-sm">Month</label>
+                <input style="font-family: monospace" class="flex grow shrink px-2 h-8 bg-stone-800  border-stone-600 border text-xs" type="text" id="month" name="month" placeholder="{1-12, *}" value="{{ config['crontab']['month'] if 'crontab' in config else '' }}">
+            </div>
+            <div class="flex flex-row justify-center items-center shrink-0 p-4">
+                <label for="weekday" class="flex flex-none shrink-0 grow-0 w-20 text-sm">Weekday</label>
+                <input style="font-family: monospace" class="flex grow shrink px-2 h-8 bg-stone-800  border-stone-600 border text-xs" type="text" id="weekday" name="weekday" placeholder="{0-6, *}" value="{{ config['crontab']['weekday'] if 'crontab' in config else '' }}">
+            </div>
+        </div>
+    </div>
+    <div class='pt-4 w-full'>
+        <button type='button' onclick="click_next_sibling(this)"
+            class="flex flex-row grow h-full  bg-stone-900 justify-center items-center hover:bg-blue-900 border border-stone-600 gap-2 w-full" >
+            <div class="flex flex-row w-10 h-10 items-center justify-center">
+                <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 21 16">
+                    <path d="M11 16a1 1 0 0 1-1-1v-1h2v1a1 1 0 0 1-1 1Z"/>
+                    <path d="M17.989 6.124a6.5 6.5 0 0 0-12.495-2.1A5 5 0 0 0 6 14h4V8.414l-.293.293a1 1 0 0 1-1.414-1.414l2-2a1 1 0 0 1 1.414 0l2 2a1 1 0 1 1-1.414 1.414L12 8.414V14h5a4 4 0 0 0 .989-7.876Z"/>
+                </svg>
+            </div>
+            <div>Save / Update</div>
+        </button>
+        <input type="submit" class='hidden'/>
+    </div>
+</template>
+
+<template id="systemd-details">
+    <div class="flex flex-col w-full bg-stone-900  border border-stone-600 p-4 gap-2 items-center">
+        <div class="pb-2 flex w-full flex-none grow-0 shrink-0 text-blue-400">Service file</div>
+        {% for entry in systemd %}
+            <div class="pl-4 p-2 flex w-full flex-none grow-0 shrink-0 text-blue-400 text-sm">{{ entry }}</div>
+            {% for value in systemd[entry] %}
+                {% if 'placeholder' in value %}
+                <div class="flex w-full flex-none grow-0 shrink-0 flex-row gap-4 pl-4 items-center">
+                    <label for="systemd-desc" class="flex flex-none shrink-0 grow-0 w-32 text-sm">{{ value["name"] }}</label>
+                    <input style="font-family: monospace" class="flex grow w-full shrink px-3 h-8 bg-stone-900  border-stone-600 border text-xs" type="text" id="systemd-{{ value["name"].lower() }}" name="systemd-{{ value["name"].lower() }}" placeholder="{{ value["placeholder"] }}" value="{{ config['systemd'][entry][value["name"].lower()] if 'systemd' in config else '' }}">
+                </div>
+                {% else %}
+                <div class="flex w-full flex-none grow-0 shrink-0 flex-row gap-4 pl-4 items-center">
+                    <label for="systemd-desc" class="flex flex-none shrink-0 grow-0 w-32 text-sm">{{ value["name"] }}</label>
+                    <select style="font-family: monospace" class="flex grow w-full shrink px-2 h-8 bg-stone-900  border-stone-600 border text-xs" id="systemd-{{ value["name"].lower() }}" name="systemd-{{ value["name"].lower() }}">
+                        {% for opt in value['options'] %}
+                            {% if 'systemd' in config and opt == config['systemd'][entry][value["name"].lower()] %}
+                                <option value="{{ opt }}" class="text-sm" selected="selected">{{ opt }}</option>
+                            {% else %}
+                                <option value="{{ opt }}" class="text-sm">{{ opt }}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endif %}
+            {% endfor %}
+        {% endfor %}
+    </div>
+    <div class='pt-4 w-full'>
+        <button type='button' onclick="click_next_sibling(this)"
+            class="flex flex-row grow h-full  bg-stone-900 justify-center items-center hover:bg-blue-900 border border-stone-600 gap-2 w-full" >
+            <div class="flex flex-row w-10 h-10 items-center justify-center">
+                <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 21 16">
+                    <path d="M11 16a1 1 0 0 1-1-1v-1h2v1a1 1 0 0 1-1 1Z"/>
+                    <path d="M17.989 6.124a6.5 6.5 0 0 0-12.495-2.1A5 5 0 0 0 6 14h4V8.414l-.293.293a1 1 0 0 1-1.414-1.414l2-2a1 1 0 0 1 1.414 0l2 2a1 1 0 1 1-1.414 1.414L12 8.414V14h5a4 4 0 0 0 .989-7.876Z"/>
+                </svg>
+            </div>
+            <div>Save / Update</div>
+        </button>
+        <input type="submit" class='hidden'/>
+    </div>
+</template>
+
+<div class="p-4 flex flex-col w-full h-full gap-4 no-scrollbar overflow-auto">
+    <div class="flex grow-0 shrink-0 w-full h-4 flex-row gap-2">
+        <div class="flex flex-none h-full grow-0 shrink-0 text-sm text-blue-400">Scripts</div>
+        <div class="flex flex-none h-full grow-0 shrink-0 text-sm">></div>
+        <div id='name-title' class="flex flex-none h-full grow-0 shrink-0 text-sm">
+            {% if config['name'] == '' %}
+            New Script
+            {% else %}
+            {{ config['name'] }}
+            {% endif %}
+        </div>
+        <div class="flex flex-1 grow shrink w-1 h-full"></div>
+    </div>
+    <div class="flex grow-0 shrink-0 w-full flex-row">
+        <div class="flex flex-none h-full grow-0 shrink-0 text-3xl">
+            {% if config['name'] == '' %}
+            Create Script
+            {% else %}
+            Edit script
+            {% endif %}
+        </div>
+        <div class="flex flex-1 grow shrink w-1 h-full"></div>
+    </div>
+    {% if "error" in config and config["error"] != "" %}
+    <div class="flex w-full flex-row  bg-red-800 border border-red-400 px-2 py-1 text-xs justify-center">
+        {{ config["error"] }}
+    </div>
+    {% endif %}
+    <div class="flex grow-0 shrink-0  p-3 w-full bg-stone-800 border border-stone-600">
+        <form class="w-full" action="/script/{{ config['name'] }}", method='POST' enctype="multipart/form-data" onkeypress="if (event.key == 'Enter' && event.target.type != 'textarea') { event.preventDefault(); return false; }">
+            <input class="hidden" name="old-name" value="{{ config['oldName'] }}">
+            <div class="flex w-full flex-col gap-2">
+                <div class="flex flow-col justify-center items-center" id="log-spinner" role="status">
+                    <svg aria-hidden="true" class="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/>
+                        <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/>
+                    </svg>
+                    <span class="sr-only">Loading...</span>
+                </div>
+                <div id="log-header" class="pb-1 flex w-full flex-none grow-0 shrink-0 text-blue-400 hidden">Log</div>
+                <textarea id="log-textarea" disabled="true" class="border border-stone-500 flex w-full bg-stone-900 p-2 text-xs hidden" style="font-family: monospace" rows='6'></textarea>
+                <div class="flex flex-row w-full h-4" id="refresh-container">
+                    <div class="flex grow shrink h-full"></div>
+                    <div class="flex shrink-0 grow-0 h-full text-xs pr-4" id="refresh-text">Refresh in 10s</div>
+                </div>
+                <div class="pb-1 flex w-full flex-none grow-0 shrink-0 text-blue-400">General</div>
+                <div class="flex w-full flex-none grow-0 shrink-0 flex-row justify-center items-center gap-4 pl-4">
+                    <label for="name" class="flex flex-none shrink-0 grow-0 w-20 text-sm">Name</label>
+                    <input style="font-family: monospace" class="flex grow w-full shrink px-2 h-8 bg-stone-900  border-stone-600 border text-xs" type="text" id="name" name="name" placeholder="e.g. myscript (only characters, numbers and underscores allowed)" value="{{ config['name'] }}" pattern="[a-zA-Z0-9_\-]+"
+                        onkeyup="document.querySelector('#name-title').innerHTML = (this.value != '') ? this.value : 'New Script'; document.querySelector('form').setAttribute('action', '/script/' + this.value);">
+                </div>
+                <div class="flex w-full flex-none grow-0 shrink-0 flex-row justify-center items-center gap-4 pl-4">
+                    <label for="entrypoint" class="flex flex-none shrink-0 grow-0 w-20 text-sm">Entrypoint</label>
+                    <input style="font-family: monospace" class="flex grow w-full shrink px-2 h-8 bg-stone-900  border-stone-600 border text-xs" type="text" id="entrypoint" name="entrypoint" placeholder="e.g. myscript.py" value="{{ config['entryPoint'] }}">
+                </div>
+                <div class="flex w-full flex-none grow-0 shrink-0 flex-row flex-wrap items-center gap-4 pl-4">
+                    <label for="cli-args" class="flex flex-none shrink-0 grow-0 w-20 text-sm">Arguments</label>
+                    <input style="font-family: monospace" class="flex grow min-w-8 shrink px-2 h-8 bg-stone-900  border-stone-600 border text-xs" type="text" id="cli-args" name="cli-args" placeholder="Specify an argument and press enter to confirm." value="{{ config["arguments"] }}">
+                </div>
+                <div class="flex w-full flex-none grow-0 shrink-0 flex-row justify-center items-center gap-4 pl-4">
+                    <label for="interpreter" class="flex flex-none shrink-0 grow-0 w-20 text-sm">Interpreter</label>
+                    <select style="font-family: monospace" class="flex grow w-full shrink px-2 h-8 bg-stone-900  border-stone-600 border text-xs" id="interpreter" name="interpreter">
+                        {% for interpreter in interpreters %}
+                            {% if 'interpreter' in config and config['interpreter']['name'] == interpreter %}
+                            <option value="{{ interpreter }}" class="text-sm" selected="selected">{{ interpreter }}</option>
+                            {% else %}
+                                <option value="{{ interpreter }}" class="text-sm">{{ interpreter }}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+                {% if config['files'] %}
+                <div class="pt-4 pb-1 flex w-full flex-none grow-0 shrink-0 text-blue-400">Stored files</div>
+                <div class="flex flex-row w-full flex-wrap justify-start gap-2">
+                    {% for f in config['files'] %}
+                    <div class="flex flex-row h-8 shrink-0 items-center bg-stone-900  border border-stone-600 justify-center px-3 gap-2">
+                        <button type='button' class='w-4 h-full' onclick="if (this.nextElementSibling.nextElementSibling.classList.contains('line-through')) { this.nextElementSibling.nextElementSibling.classList.remove('line-through'); this.nextElementSibling.value = ''; } else { this.nextElementSibling.nextElementSibling.classList.add('line-through'); this.nextElementSibling.value = '{{ f }}'; }">
+                            <svg class="w-4 h-4 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 20">
+                                <path d="M17 4h-4V2a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v2H1a1 1 0 0 0 0 2h1v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V6h1a1 1 0 1 0 0-2ZM7 2h4v2H7V2Zm1 14a1 1 0 1 1-2 0V8a1 1 0 0 1 2 0v8Zm4 0a1 1 0 0 1-2 0V8a1 1 0 0 1 2 0v8Z"/>
+                            </svg>
+                        </button>
+                        <input style="font-family: monospace" class="text-sm hidden" type="text" name="file-remove" value="">
+                        <div class='text-xs'>{{ f }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <div class="pt-4 pb-1 flex w-full flex-none grow-0 shrink-0 text-blue-400">Upload files</div>
+                <div class="flex flex-row w-full flex-none grow-0 shrink-0 h-14 gap-2">
+                    <button id='upload-btn' type='button' onclick="click_next_sibling(this)"
+                        class="flex flex-row grow h-full  bg-stone-900 justify-center items-center hover:bg-blue-900 border border-stone-600 gap-2" >
+                        <div class="flex flex-row w-10 h-10 items-center justify-center">
+                            <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="m14.707 4.793-4-4a1 1 0 0 0-1.416 0l-4 4a1 1 0 1 0 1.416 1.414L9 3.914V12.5a1 1 0 0 0 2 0V3.914l2.293 2.293a1 1 0 0 0 1.414-1.414Z"/>
+                                <path d="M18 12h-5v.5a3 3 0 0 1-6 0V12H2a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2Zm-3 5a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"/>
+                            </svg>
+                        </div>
+                        <div>Upload</div>
+                    </button>
+                    <input style="font-family: monospace" type="file" name="files" id="files" class='hidden' multiple='multiple' onchange="update_file_list()">
+                </div>
+                <div class="flex flex-row w-full flex-wrap justify-start gap-2" id='files-list'></div>
+                <div class="pt-4 pb-1 flex w-full flex-none grow-0 shrink-0 text-blue-400">Run Commands</div>
+                <div class="flex flex-row w-full flex-none grow-0 shrink-0">
+                    <div class="w-full">
+                        <textarea name='install-script' id="install-script" style="font-family: monospace" class="border border-white  flex w-full bg-stone-900 p-2 text-xs" rows='8' placeholder="Run bash commands in the script project directory, e.g. to unpack an uploaded ZIP archive..." value="{{ config['install'] if 'install' in config and config['install'] != None else '' }}">{{ config['install'] if 'install' in config and config['install'] != None else '' }}</textarea>
+                    </div>
+                </div>
+                <div class="pt-4 pb-1 flex w-full flex-none grow-0 shrink-0 text-blue-400">Environment variables</div>
+                <div id='env-list' class="flex flex-col w-full gap-2">
+                    {% for env in config['environment'] %}
+                        <div class="w-full flex flex-row gap-4 justify-center items-center">
+                            <input style="font-family: monospace" class="env-name flex grow shrink px-2 h-8 bg-stone-900  border-stone-600 border text-xs" type="text" name="env_name" placeholder="VARIABLE" value="{{ env }}">
+                            <input style="font-family: monospace" class="env-value flex grow shrink px-2 h-8 bg-stone-900  border-stone-600 border text-xs" type="text" name="env_value" placeholder="VALUE" value="{{ config['environment'][env] }}">
+                            <button type="button w-4" onclick="this.parentElement.remove();">
+                                <svg class="w-4 h-4 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 20">
+                                    <path d="M17 4h-4V2a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v2H1a1 1 0 0 0 0 2h1v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V6h1a1 1 0 1 0 0-2ZM7 2h4v2H7V2Zm1 14a1 1 0 1 1-2 0V8a1 1 0 0 1 2 0v8Zm4 0a1 1 0 0 1-2 0V8a1 1 0 0 1 2 0v8Z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="w-full flex flex-row gap-4 h-10 pt-2">
+                    <button type='button' onclick="add_env_variable()"
+                        class="flex flex-row basis-1/2 grow h-full  bg-stone-900 justify-center items-center hover:bg-blue-900 border border-stone-600 gap-2" >
+                        <svg class="w-3 h-3 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16"/>
+                        </svg>
+                        <div class='text-sm'>Add environment variable</div>
+                    </button>
+                    <button type='button' onclick="click_next_sibling(this)"
+                        class="flex flex-row grow basis-1/2 h-full  bg-stone-900 justify-center items-center hover:bg-blue-900 border border-stone-600 gap-2" >
+                        <svg class="w-3 h-3 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16"/>
+                        </svg>
+                        <div class='text-sm'>Upload .env file</div>
+                    </button>
+                    <input style="font-family: monospace" type="file" class='hidden' onchange="add_env_from_file(this)">
+                    <div class="w-4">
+                    </div>
+                </div>
+                <div class="pt-4 pb-1 flex w-full flex-none grow-0 shrink-0 text-blue-400">Execution scheduling</div>
+                <div class="flex flex-row w-full flex-none grow-0 shrink-0 h-14 gap-2">
+                    <input style="font-family: monospace" class="hidden" name="scheduling" value="">
+                    <button id='crontab-btn' type='button' onclick="show_crontab_details(this)"
+                        class="flex flex-row grow h-full  bg-stone-900 justify-center items-center hover:bg-blue-900 border border-stone-600 gap-2" >
+                        <div>Crontab</div>
+                    </button>
+                    <button id='systemd-btn' type='button' onclick="show_systemd_details(this)"
+                        class="flex flex-row grow h-full  bg-stone-900 justify-center items-center hover:bg-blue-900 border border-stone-600 gap-2" >
+                        <div>Systemd</div>
+                    </button>
+                    <button id='none-btn' type='button' onclick="show_no_details(this)"
+                        class="flex flex-row grow h-full  bg-stone-900 justify-center items-center hover:bg-blue-900 border border-stone-600 gap-2" >
+                        <div>None</div>
+                    </button>
+                </div>
+                <div id="execution-content" class="flex flex-col w-full">
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

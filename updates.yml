@@ -1,0 +1,6 @@
+updates:
+  - title: What does this service provide?
+    paragraphs:
+      - This service provides an easy way to manage all your scripts in one place. It can be a script that you only want to execute manually or one that you want to manage via a systemd service or crontab job. Everything is possible and you can switch between all options with only a handful of mouse clicks.
+      - Furthurmore you can enable or disable any service in one button press and also see the status of all your services in one glance. On the left, you can find the navigation bar. Besides the common navigation buttons to get back to Home, create a new script or log out, you can find a list of all currently installed scripts and their status. Using the expand menue of each service you can easily execute it or delete it if you no longer need it.
+      - Please take a look and check out all options. If you find any bugs or have any suggestions for improvement, don't hesitate to submit them! As of now, this is all a proof of concept and may contain various bugs.

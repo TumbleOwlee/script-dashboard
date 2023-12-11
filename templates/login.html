@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="{{url_for('static',filename='css/main.css')}}">
+    <link rel="preconnect" href="https://rsms.me/">
+    <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+</head>
+
+<body class="dark:bg-stone-900 dark:text-white font-inter h-screen w-screen">
+    <div class='flex flex-col w-full h-full justify-center items-center gap-4'>
+        <form action='login' method='POST'>
+            <div class='flex flex-col w-96 shrink-0 grow-0 flex-none bg-stone-950 border border-stone-600 justify-center items-center px-12 pb-10 py-8 gap-4'>
+                <div class="flex flex-none grow-0 shrink-0 text-3xl text-blue-400">Login</div>
+                <div class="flex flex-row justify-center items-center shrink-0 px-2 w-full">
+                    <label for="user" class="flex flex-none shrink-0 grow-0 w-20 text-sm">User</label>
+                    <input class="flex grow shrink px-2 h-8 bg-stone-900  border-stone-600 border text-xs" type="text" id="user" name="user" autocomplete="on" placeholder="Username">
+                </div>
+                <div class="flex flex-row justify-center items-center shrink-0 px-2 w-full">
+                    <label for="password" class="flex flex-none shrink-0 grow-0 w-20 text-sm">Password</label>
+                    <input class="flex grow shrink px-2 h-8 bg-stone-900  border-stone-600 border text-xs" type="password" id="password" name="password" autocomplete="on" placeholder="Password" onkeydown="if (event.keyCode == 13) { this.form.submit() }">
+                </div>
+            </div>
+        </form>
+        {% if error != None and error != "" %}
+        <div class="flex flex-row w-72 p-2 bg-red-900  border border-red-500 justify-center items-center">
+            <div class="px-2 text-xs">{{ error }}</div>
+        </div>
+        {% endif %}
+    </div>
+</body>
+
+</html>

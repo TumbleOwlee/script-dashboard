@@ -1,0 +1,16 @@
+workspace: /opt/script-management/
+crontab: /etc/cron.d/
+systemd: /etc/systemd/system/
+interpreters:
+  Python2:
+    command: /usr/bin/python2
+  Python3:
+    command: /usr/bin/python3
+  Bash:
+    command: /usr/bin/bash
+  Lua:
+    command: /usr/bin/lua
+  RScript:
+    command: /usr/bin/rscript
+  Native:
+    command:

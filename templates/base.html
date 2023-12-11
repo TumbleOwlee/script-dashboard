@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="{{url_for('static',filename='css/main.css')}}">
+    <link rel="preconnect" href="https://rsms.me/">
+    <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+    <script>
+        function handle_expand(elem) {
+            if (!elem.querySelector('.expand-btn').classList.contains('hidden')) {
+                elem.parentElement.parentElement.querySelector('.operations').classList.remove('hidden');
+                elem.querySelector('.expand-btn').classList.add('hidden');
+                elem.querySelector('.hide-btn').classList.remove('hidden');
+             } else {
+                elem.parentElement.parentElement.querySelector('.operations').classList.add('hidden');
+                elem.querySelector('.expand-btn').classList.remove('hidden');
+                elem.querySelector('.hide-btn').classList.add('hidden');
+             }
+        }
+
+        function get(url) {
+            return new Promise((resolve, reject) => {
+                const req = new XMLHttpRequest();
+                req.open('GET', url);
+                req.onload = () => req.status === 200 ? resolve(req.response) : reject(Error(req.statusText));
+                req.onerror = (e) => reject(Error(`Network Error: ${e}`));
+                req.send();
+            });
+        }
+
+        function check_status() {
+            var elements = document.getElementsByClassName("script-status");
+            for (var i = 0; i < elements.length; ++i) {
+                var elem = elements[i];
+                ((elem) => {
+                    get("/status/" + elem.id).then((data) => {
+                        elem.innerHTML = "";
+                        const obj = JSON.parse(data);
+                        if (obj.active == "active") {
+                            const template = document.querySelector("#status-active");
+                            const clone = template.content.cloneNode(true);
+                            elem.appendChild(clone);
+                            var startStop = document.getElementById(elem.id + "-start")
+                            if (startStop != null) {
+                                startStop.innerHTML = "Stop"
+                                startStop.disabled = false
+                            }
+                        } else if (obj.status == "failed") {
+                            const template = document.querySelector("#status-failed");
+                            const clone = template.content.cloneNode(true);
+                            elem.appendChild(clone);
+                            var startStop = document.getElementById(elem.id + "-start")
+                            if (startStop != null) {
+                                startStop.innerHTML = "Start"
+                                startStop.disabled = false
+                            }
+                        } else { // inactive
+                            const template = document.querySelector("#status-inactive");
+                            const clone = template.content.cloneNode(true);
+                            elem.appendChild(clone);
+                            var startStop = document.getElementById(elem.id + "-start")
+                            if (startStop != null) {
+                                startStop.innerHTML = "Start"
+                                startStop.disabled = false
+                            }
+                        }
+                        document.getElementById("checkbox-" + elem.id).checked = (obj.enable == "enabled");
+                    }).catch((err) => {});
+                })(elem);
+            }
+        }
+
+        function toggle_enable_disable(elem, id) {
+            const url = (elem.checked) ? "/enable/" : "/disable/";
+            get(url + id).then((data) => {
+                const obj = JSON.parse(data)
+                if (url == "/disable/") {
+                    elem.checked = (obj.success) ? false : true;
+                } else {
+                    elem.checked = (obj.success) ? true : false;
+                }
+                check_status()
+            }).catch((err) => {});
+        }
+
+        function handle_start_stop(elem) {
+            const name = elem.name;
+            const value = elem.innerHTML;
+
+            elem.disabled = true;
+            elem.innerHTML = (value == "Start") ? "Starting..." : "Stopping...";
+            ((elem, op) => {
+                get("/" + op + "/" + elem.name).then((data) => {
+                    console.log(data)
+                    check_status()
+                }).catch((err) => {});
+            })(elem, value.toLowerCase())
+        }
+
+        document.addEventListener("DOMContentLoaded", function(){
+            check_status()
+            var updateStatus = window.setInterval(check_status, 30 * 1000)
+        });
+    </script>
+    {% block head %}{% endblock %}
+</head>
+
+<body class="dark:bg-stone-900 dark:text-white font-inter">
+
+    <template id='status-inactive'>
+        <svg xmlns="http://www.w3.org/2000/svg" class="fill-amber-400 w-4 h-4 bi bi-exclamation-triangle" viewBox="0 0 16 16">
+            <path d="M7.938 2.016A.13.13 0 0 1 8.002 2a.13.13 0 0 1 .063.016.146.146 0 0 1 .054.057l6.857 11.667c.036.06.035.124.002.183a.163.163 0 0 1-.054.06.116.116 0 0 1-.066.017H1.146a.115.115 0 0 1-.066-.017.163.163 0 0 1-.054-.06.176.176 0 0 1 .002-.183L7.884 2.073a.147.147 0 0 1 .054-.057zm1.044-.45a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566z"/>
+            <path d="M7.002 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 5.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0z"/>
+        </svg>
+    </template>
+
+    <template id='status-failed'>
+        <svg xmlns="http://www.w3.org/2000/svg" class="fill-red-700 w-4 h-4 bi bi-x-circle" viewBox="0 0 16 16">
+            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+            <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
+        </svg>
+    </template>
+
+    <template id='status-active'>
+        <svg xmlns="http://www.w3.org/2000/svg" class="fill-green-700 w-4 h-4 bi bi-check-circle" viewBox="0 0 16 16">
+            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+            <path d="M10.97 4.97a.235.235 0 0 0-.02.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-1.071-1.05"/>
+        </svg>
+    </template>
+
+    <!-- 2-column split -->
+    <div class="absolute h-screen w-screen flex flex-row justify-center justify-items-center">
+        <!-- left navigation bar -->
+        <div id="navigation" class="flex w-80 h-full flex-none grow-0 shrink-0 dark:bg-stone-800 justify-center">
+            <div class="flex w-full h-full flex-col gap-0 space-x-0 no-scrollbar overflow-auto snap-y">
+                <!-- header -->
+                <div class="flex grow-0 flex-none w-full dark:bg-stone-900 h-8 border-y border-stone-500">
+                    <div class="flex flex-col w-full h-full justify-center items-center">
+                        <div class="text-sm">Created by David Loewe</div>
+                    </div>
+                </div>
+                <div class="flex grow-0 flex-none h-4 w-full"></div>
+                <!-- logo line -->
+                <div class="flex grow-0 flex-none w-full h-20 p-3">
+                    <div class="flex flex-row h-full w-full gap-x-4 px-2 items-center justify-center">
+                        <div>
+                            <p class="text-lg font-bold text-blue-400">Script Dashboard</p>
+                            <p class="text-center text-sm text-stone-300">Version 0.1.0</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex grow-0 flex-none h-4 w-full"></div>
+                <div class="flex flex-row w-full flex-nowrap px-6 py-4 justify-center items-center">
+                    <button type="button" class="w-full h-8 dark:bg-stone-900 flex flex-row items-center px-6 border border-stone-700 justify-center items-center" disabled="true">
+                        <div class="flex grow-0 flex-none text-blue-400 text-sm">Logged in as</div>
+                        <div class="flex grow-0 flex-none pl-2 text-sm">{{ username }}</div>
+                    </button>
+                </div>
+                <!-- home -->
+                <div class="flex grow-0 flex-none w-full px-6" onclick="location.href = '{{ url_for('home') }}'">
+                    <button type="button" class="w-full h-8 dark:bg-stone-900 hover:bg-blue-900  flex flex-row items-center px-6 border border-stone-700">
+                        <div class="w-5">
+                            <svg class="w-4 h-4 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="m19.707 9.293-2-2-7-7a1 1 0 0 0-1.414 0l-7 7-2 2a1 1 0 0 0 1.414 1.414L2 10.414V18a2 2 0 0 0 2 2h3a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h3a2 2 0 0 0 2-2v-7.586l.293.293a1 1 0 0 0 1.414-1.414Z"/>
+                            </svg>
+                        </div>
+                        <div class="px-4 text-sm">Home</div>
+                    </button>
+                </div>
+                <div class="flex grow-0 flex-none h-1 w-full"></div>
+                <div class="flex flex-none w-full h-8 flex-row px-6">
+                    <button class="px-2 flex w-full h-full flex-none shrink-0 grow-0 w-36 hover:bg-blue-900 flex-row items-center px-6 bg-stone-900  border border-stone-700" onclick="location.href = '{{ url_for('new_script') }}'">
+                        <svg class="w-4 h-4 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M5 5V.13a2.96 2.96 0 0 0-1.293.749L.879 3.707A2.96 2.96 0 0 0 .13 5H5Z"/>
+                            <path d="M6.737 11.061a2.961 2.961 0 0 1 .81-1.515l6.117-6.116A4.839 4.839 0 0 1 16 2.141V2a1.97 1.97 0 0 0-1.933-2H7v5a2 2 0 0 1-2 2H0v11a1.969 1.969 0 0 0 1.933 2h12.134A1.97 1.97 0 0 0 16 18v-3.093l-1.546 1.546c-.413.413-.94.695-1.513.81l-3.4.679a2.947 2.947 0 0 1-1.85-.227 2.96 2.96 0 0 1-1.635-3.257l.681-3.397Z"/>
+                            <path d="M8.961 16a.93.93 0 0 0 .189-.019l3.4-.679a.961.961 0 0 0 .49-.263l6.118-6.117a2.884 2.884 0 0 0-4.079-4.078l-6.117 6.117a.96.96 0 0 0-.263.491l-.679 3.4A.961.961 0 0 0 8.961 16Zm7.477-9.8a.958.958 0 0 1 .68-.281.961.961 0 0 1 .682 1.644l-.315.315-1.36-1.36.313-.318Zm-5.911 5.911 4.236-4.236 1.359 1.359-4.236 4.237-1.7.339.341-1.699Z"/>
+                        </svg>
+                        <div class="h-full w-2"></div>
+                        <div class="px-3 text-sm py-2">Create Script</div>
+                    </button>
+                    <div class="flex h-full w-1 shrink-0 flex-auto grow"></div>
+                </div>
+                <div class="flex grow-0 flex-none h-1 w-full"></div>
+                <div class="flex flex-none w-full h-8 flex-row px-6">
+                    <button class="px-2 flex w-full h-full flex-none shrink-0 grow-0 w-36 hover:bg-blue-900 flex-row items-center px-6 bg-stone-900  border border-stone-700" onclick="location.href = '{{ url_for('logout') }}'">
+                        <svg class="w-4 h-4 text-gray-800 dark:text-white" fill="#dc2626" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M7.707,8.707,5.414,11H17a1,1,0,0,1,0,2H5.414l2.293,2.293a1,1,0,1,1-1.414,1.414l-4-4a1,1,0,0,1,0-1.414l4-4A1,1,0,1,1,7.707,8.707ZM21,1H13a1,1,0,0,0,0,2h7V21H13a1,1,0,0,0,0,2h8a1,1,0,0,0,1-1V2A1,1,0,0,0,21,1Z"/>
+                        </svg>
+                        <div class="h-full w-2"></div>
+                        <div class="px-3 text-sm py-2 text-red-600">Logout</div>
+                    </button>
+                    <div class="flex h-full w-1 shrink-0 flex-auto grow"></div>
+                </div>
+                <div class="flex w-full h-10 shrink-0 flex-none grow-0"></div>
+                <!-- Scripts -->
+                <div class="flex grow-0 flex-none px-4 w-full">
+                    <div class="w-full flex flex-col p-2 gap-1">
+                        <div class="px-4 text-sm py-2 text-blue-400">Scripts</div>
+                        <div class="w-full flex flex-col gap-1">
+                            {% for script in scripts %}
+                            <div class="snap-center w-full flex flex-col dark:bg-stone-900  border border-stone-700">
+                                <div class="w-full flex flex-row hover:bg-blue-900 items-center">
+                                    <button type="button" class="flex flex-row w-full items-center pl-6 hover:underline" onclick="location.href = '{{ url_for('script', id=script) }}'">
+                                        <div class="script-status" id="{{ script }}">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="fill-amber-400 w-4 h-4 bi bi-exclamation-triangle" viewBox="0 0 16 16">
+                                                <path d="M7.938 2.016A.13.13 0 0 1 8.002 2a.13.13 0 0 1 .063.016.146.146 0 0 1 .054.057l6.857 11.667c.036.06.035.124.002.183a.163.163 0 0 1-.054.06.116.116 0 0 1-.066.017H1.146a.115.115 0 0 1-.066-.017.163.163 0 0 1-.054-.06.176.176 0 0 1 .002-.183L7.884 2.073a.147.147 0 0 1 .054-.057zm1.044-.45a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566z"/>
+                                                <path d="M7.002 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 5.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0z"/>
+                                            </svg>
+                                        </div>
+                                        <div class="pl-4 pr-2 text-xs py-2 text-start">{{script}}</div>
+                                    </button>
+                                    <div class="flex flex-row items-center">
+                                        <label class="relative inline-flex items-center cursor-pointer">
+                                            <input type="checkbox" value="" class="sr-only peer" id='checkbox-{{ script }}' onclick="toggle_enable_disable(this, '{{ script }}')">
+                                            <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                                        </label>
+                                    </div>
+                                    <button id='test' type="button" class="px-4" onclick="handle_expand(this)">
+                                        <svg class="expand-btn w-3 h-3 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 8">
+                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 5.326 5.7a.909.909 0 0 0 1.348 0L13 1"/>
+                                        </svg>
+                                        <svg class="hide-btn hidden w-3 h-3 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 8">
+                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7 7.674 1.3a.91.91 0 0 0-1.348 0L1 7"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <ul class="operations text-sm w-full hidden bg-stone-800">
+                                    <li><button id="{{ script }}-start" name="{{ script }}" type="button" class="pl-16 w-full p-1 hover:bg-blue-900  hover:underline text-left text-xs" onclick="handle_start_stop(this)">Start</button></li>
+                                    <li><button type="button" class="pl-16 w-full p-1 hover:bg-blue-900  hover:underline text-left text-xs" onclick="location.href = '{{ url_for('execute', id=script) }}'">Execute</button></li>
+                                    <li><button type="button" class="pl-16 w-full p-1 hover:bg-red-900  hover:underline text-left text-xs"  onclick="location.href = '{{ url_for('delete', id=script) }}'">Delete</button></li>
+                                </ul>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                <div class="flex w-full h-1 shrink-0 flex-auto grow"></div>
+            </div>
+        </div>
+        <!-- right content view -->
+        <div class="flex-1 border border-stone-500">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+</body>
+
+</html>
