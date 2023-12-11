@@ -312,10 +312,16 @@ def execute(id):
         with open(os.path.join(working_dir, '.env/config.yml')) as f:
             config = yaml.load(f, yaml.FullLoader)
             try:
-                shell = Shell(working_directory=working_dir, env=config['environment'], log_dir=os.path.join(working_dir, '.env'))
-                ret = shell.run([['bash', script]])
-                if ret != 0:
-                    config['error'] = 'Execution failed. Check configuration and/or upload a new version.'
+                output = ''
+                if config['scheduling'] == 'systemd':
+                    service_file = f"{username}_{id}.service"
+                    returncode, output = SYSTEM_SHELL.check_output(['systemctl', 'is-active', service_file.lower()])
+                    output = output.replace('\n', '')
+                if output != 'active':
+                    shell = Shell(working_directory=working_dir, env=config['environment'], log_dir=os.path.join(working_dir, '.env'))
+                    ret = shell.run([['bash', script]])
+                    if ret != 0:
+                        config['error'] = 'Execution failed. Check configuration and/or upload a new version.'
             except subprocess.TimeoutExpired:
                 config['error'] = 'Execution timed out. All manual execution has a timeout of 5 seconds.'
             config['files'] = list_files(working_dir)
