@@ -207,16 +207,19 @@
             var elem = document.getElementById("log-textarea")
             var elemHeader = document.getElementById("log-header")
             var elemRefresh = document.getElementById("refresh-container")
+            var elemText = document.getElementById("refresh-text")
             if (obj.log != "") {
                 elem.innerHTML = obj.log
                 elem.classList.remove("hidden")
                 elemHeader.classList.remove("hidden")
                 elemRefresh.classList.remove("hidden")
+                elemText.classList.remove("hidden")
             } else {
                 elem.innerHTML = ""
                 elem.classList.add("hidden")
                 elemHeader.classList.add("hidden")
                 elemRefresh.classList.add("hidden")
+                elemText.classList.add("hidden")
             }
         }).catch((err) => {});
     }
@@ -397,7 +400,7 @@
                 <textarea id="log-textarea" disabled="true" class="border border-stone-500 flex w-full bg-stone-900 p-2 text-xs hidden" style="font-family: monospace" rows='6'></textarea>
                 <div class="flex flex-row w-full h-4" id="refresh-container">
                     <div class="flex grow shrink h-full"></div>
-                    <div class="flex shrink-0 grow-0 h-full text-xs pr-4" id="refresh-text">Refresh in 10s</div>
+                    <div class="flex shrink-0 grow-0 h-full text-xs pr-4 hidden" id="refresh-text">Refresh in 10s</div>
                 </div>
                 <div class="pb-1 flex w-full flex-none grow-0 shrink-0 text-blue-400">General</div>
                 <div class="flex w-full flex-none grow-0 shrink-0 flex-row justify-center items-center gap-4 pl-4">
