@@ -34,6 +34,8 @@ if __name__ == '__main__':
     parser = ArgumentParser(description="This is a script dashboard system accessible over the web browser.")
     req_group = parser.add_argument_group("required")
     req_group.add_argument("--config", "-c", required=True, type=str, help="JSON configuration file.")
+    req_group.add_argument("--crt", required=True, type=str, help="Certificate file.")
+    req_group.add_argument("--key", required=True, type=str, help="Private key file.")
     args = parser.parse_args()
 
     try:
@@ -42,7 +44,7 @@ if __name__ == '__main__':
             if not os.path.exists(app.custom_config['workspace']):
                 os.mkdir(app.custom_config['workspace'])
 
-        app.run(host="0.0.0.0", port=5000, ssl_context=('./server.crt', './server.key'))
+        app.run(host="0.0.0.0", port=5000, ssl_context=(args.crt, args.key))
     except Exception as e:
         print(e)
 
