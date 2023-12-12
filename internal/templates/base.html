@@ -251,6 +251,7 @@
                                 <ul class="operations text-sm w-full hidden bg-stone-800">
                                     <li><button id="{{ script }}-start" name="{{ script }}" type="button" class="pl-16 w-full p-1 hover:bg-blue-900  hover:underline text-left text-xs" onclick="handleStartStop(this)">Start</button></li>
                                     <li><button type="button" class="pl-16 w-full p-1 hover:bg-blue-900  hover:underline text-left text-xs" onclick="location.href = '{{ url_for('execute', id=script) }}'">Execute</button></li>
+                                    <li><button type="button" class="pl-16 w-full p-1 hover:bg-blue-900  hover:underline text-left text-xs" onclick="location.href = '{{ url_for('download', id=script) }}'">Download</button></li>
                                     <li><button type="button" class="pl-16 w-full p-1 hover:bg-red-900  hover:underline text-left text-xs"  onclick="location.href = '{{ url_for('delete', id=script) }}'">Delete</button></li>
                                 </ul>
                             </div>

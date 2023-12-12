@@ -5,7 +5,7 @@ import shutil
 import subprocess
 from internal.shell import Shell
 from werkzeug.utils import secure_filename
-from flask import render_template, request, redirect, url_for
+from flask import render_template, request, redirect, url_for, send_from_directory
 from flask_login import login_required, current_user
 from internal.appl import app
 
@@ -124,7 +124,7 @@ def list_files(path):
     return files
 
 
-def list_dir(path, recursive: bool = False):
+def list_dir(path):
     create_dir_if_not_exist(path)
     files = [f for f in os.listdir(path) if f != ".env"]
     return files if files is not None else []
@@ -388,6 +388,17 @@ def get_config_from_form(request):
         status = False
 
     return status, config
+
+
+@app.route("/download/<id>", methods=["GET", "POST"])
+@login_required
+def download(id):
+    script_dir = os.path.join(app.custom_config['workspace'], current_user.id, id)
+    files = list_dir(script_dir)
+    tar = f"{current_user.id}_{id}.tar.gz"
+    shell: Shell = Shell(working_directory=script_dir)
+    returncode, output = shell.check_output(['tar', '-czvf', os.path.join("/tmp/", tar)] + files)
+    return send_from_directory(directory="/tmp/", path=tar, as_attachment=True)
 
 
 @app.route("/script/<id>", methods=['POST'])

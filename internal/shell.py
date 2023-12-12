@@ -39,7 +39,7 @@ class Shell:
             self.log.write(f"[!] Run command: {command}\n")
             self.log.flush()
 
-            output = subprocess.check_output(command, timeout=30, text=True)
+            output = subprocess.check_output(command, timeout=30, text=True, cwd=self.working_directory, env=env)
         except subprocess.CalledProcessError as e:
             returncode = e.returncode
             output = e.output
