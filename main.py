@@ -1,7 +1,7 @@
 import os
 import yaml
 
-from flask import redirect, url_for, render_template
+from flask import redirect, url_for, render_template, request
 from flask_login import current_user
 from application import app
 from argparse import ArgumentParser
@@ -20,6 +20,14 @@ def index():
 @app.errorhandler(404)
 def not_found(e):
     return render_template('not_found.html')
+
+
+@app.before_request
+def redirect_https():
+    if not request.is_secure:
+        url = request.url.replace('http://', 'https://', 1)
+        code = 301
+        return redirect(url, code=code)
 
 
 if __name__ == '__main__':

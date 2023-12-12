@@ -9,15 +9,51 @@
     <link rel="preconnect" href="https://rsms.me/">
     <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
     <script>
-        function handle_expand(elem) {
-            if (!elem.querySelector('.expand-btn').classList.contains('hidden')) {
-                elem.parentElement.parentElement.querySelector('.operations').classList.remove('hidden');
-                elem.querySelector('.expand-btn').classList.add('hidden');
-                elem.querySelector('.hide-btn').classList.remove('hidden');
+        function addClass(selector, clazz, root = document) {
+            if (typeof(selector) == 'object') {
+                selector.classList.add(clazz);
+            } else {
+                root.querySelector(selector).classList.add(clazz);
+            }
+        }
+
+        function removeClass(selector, clazz, root = document) {
+            if (typeof(selector) == 'object') {
+                selector.classList.remove(clazz);
+            } else {
+                root.querySelector(selector).classList.remove(clazz);
+            }
+        }
+
+        function select(selector, root = document) {
+            return root.querySelector(selector);
+        }
+
+        function selectAll(selector, root = document) {
+            return root.querySelectorAll(selector);
+        }
+
+        function runAfterLoad(func) {
+            document.addEventListener("DOMContentLoaded", func);
+        }
+
+        function hasClass(selector, clazz, root = document) {
+            if (typeof(selector) == 'object') {
+                return selector.classList.contains(clazz);
+            } else {
+                return root.querySelector(selector).classList.contains(clazz);
+            }
+        }
+
+        function toggleExpand(elem) {
+            if (hasClass(".expand-btn", "hidden", elem)) {
+                addClass(".operations", "hidden", elem.parentElement.parentElement);
+                removeClass(".expand-btn", "hidden", elem)
+                addClass(".hide-btn", "hidden", elem)
              } else {
-                elem.parentElement.parentElement.querySelector('.operations').classList.add('hidden');
-                elem.querySelector('.expand-btn').classList.remove('hidden');
-                elem.querySelector('.hide-btn').classList.add('hidden');
+                removeClass(".operations", "hidden", elem.parentElement.parentElement);
+                addClass(".expand-btn", "hidden", elem)
+                removeClass(".hide-btn", "hidden", elem)
              }
         }
 
@@ -31,71 +67,51 @@
             });
         }
 
-        function check_status_of_element(elem) {
+        function checkStatusOfElement(elem) {
             ((elem) => {
                 get("/status/" + elem.id).then((data) => {
                     elem.innerHTML = "";
-                    const obj = JSON.parse(data);
-                    if (obj.active == "active") {
-                        const template = document.querySelector("#status-active");
+                    const json = JSON.parse(data);
+                    var text = "Start";
+                    if (json.active == "active") {
+                        const template = select("#status-active");
                         const clone = template.content.cloneNode(true);
                         elem.appendChild(clone);
-                        var startStop = document.getElementById(elem.id + "-start")
-                        if (startStop != null) {
-                            startStop.innerHTML = "Stop"
-                            startStop.disabled = false
-                        }
-                    } else if (obj.status == "failed") {
+                        text = "Stop"
+                    } else if (json.status == "failed") {
                         const template = document.querySelector("#status-failed");
                         const clone = template.content.cloneNode(true);
                         elem.appendChild(clone);
-                        var startStop = document.getElementById(elem.id + "-start")
-                        if (startStop != null) {
-                            startStop.innerHTML = "Start"
-                            startStop.disabled = false
-                        }
                     } else { // inactive
                         const template = document.querySelector("#status-inactive");
                         const clone = template.content.cloneNode(true);
                         elem.appendChild(clone);
-                        var startStop = document.getElementById(elem.id + "-start")
-                        if (startStop != null) {
-                            startStop.innerHTML = "Start"
-                            startStop.disabled = false
-                        }
                     }
-                    document.getElementById("checkbox-" + elem.id).checked = (obj.enable == "enabled");
+                    var btnText = select("." + elem.id + "-start");
+                    if (btnText != null) {
+                        btnText.innerHTML = text;
+                        btnText.disabled = false;
+                    }
+                    select("#checkbox-" + elem.id).checked = (json.enable == "enabled");
                 }).catch((err) => {});
             })(elem);
         }
 
-        function check_status() {
-            var elements = document.getElementsByClassName("script-status");
-            for (var i = 0; i < elements.length; ++i) {
-                var elem = elements[i];
-                check_status_of_element(elem)
-            }
+        function checkStatus() {
+            selectAll(".script-status").forEach((elem) => { checkStatusOfElement(elem); })
         }
 
-        function toggle_enable_disable(elem, id) {
+        function handleToggle(elem, id) {
             const url = (elem.checked) ? "/enable/" : "/disable/";
             get(url + id).then((data) => {
-                const obj = JSON.parse(data)
-                if (url == "/disable/") {
-                    elem.checked = (obj.success) ? false : true;
-                } else {
-                    elem.checked = (obj.success) ? true : false;
-                }
-                var elements = document.getElementsByClassName("script-status");
-                for (var i = 0; i < elements.length; ++i) {
-                    if (elements[i].id == id) {
-                        check_status_of_element(elements[i])
-                    }
-                }
+                const json = JSON.parse(data);
+                const disable = (url == "/disable/");
+                elem.checked = (json.success) ? !disable : disable;
+                selectAll(".script-status").forEach((e) => { if (e.id == id) { checkStatusOfElement(e); }})
             }).catch((err) => {});
         }
 
-        function handle_start_stop(elem) {
+        function handleStartStop(elem) {
             const name = elem.name;
             const value = elem.innerHTML;
 
@@ -103,21 +119,12 @@
             elem.innerHTML = (value == "Start") ? "Starting..." : "Stopping...";
             ((elem, op) => {
                 get("/" + op + "/" + elem.name).then((data) => {
-                    console.log(data)
-                    var elements = document.getElementsByClassName("script-status");
-                    for (var i = 0; i < elements.length; ++i) {
-                        if (elements[i].id == elem.name) {
-                            check_status_of_element(elements[i])
-                        }
-                    }
+                    selectAll(".script-status").forEach((e) => { if (e.id == elem.name) { checkStatusOfElement(e); }})
                 }).catch((err) => {});
             })(elem, value.toLowerCase())
         }
 
-        document.addEventListener("DOMContentLoaded", function(){
-            check_status()
-            var updateStatus = window.setInterval(check_status, 30 * 1000)
-        });
+        runAfterLoad(() => { checkStatus(); window.setInterval(checkStatus, 30 * 1000); })
     </script>
     {% block head %}{% endblock %}
 </head>
@@ -228,11 +235,11 @@
                                     </button>
                                     <div class="flex flex-row items-center">
                                         <label class="relative inline-flex items-center cursor-pointer">
-                                            <input type="checkbox" value="" class="sr-only peer" id='checkbox-{{ script }}' onclick="toggle_enable_disable(this, '{{ script }}')">
+                                            <input type="checkbox" value="" class="sr-only peer" id='checkbox-{{ script }}' onclick="handleToggle(this, '{{ script }}')">
                                             <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
                                         </label>
                                     </div>
-                                    <button id='test' type="button" class="px-4" onclick="handle_expand(this)">
+                                    <button id='test' type="button" class="px-4" onclick="toggleExpand(this)">
                                         <svg class="expand-btn w-3 h-3 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 8">
                                             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 5.326 5.7a.909.909 0 0 0 1.348 0L13 1"/>
                                         </svg>
@@ -242,7 +249,7 @@
                                     </button>
                                 </div>
                                 <ul class="operations text-sm w-full hidden bg-stone-800">
-                                    <li><button id="{{ script }}-start" name="{{ script }}" type="button" class="pl-16 w-full p-1 hover:bg-blue-900  hover:underline text-left text-xs" onclick="handle_start_stop(this)">Start</button></li>
+                                    <li><button id="{{ script }}-start" name="{{ script }}" type="button" class="pl-16 w-full p-1 hover:bg-blue-900  hover:underline text-left text-xs" onclick="handleStartStop(this)">Start</button></li>
                                     <li><button type="button" class="pl-16 w-full p-1 hover:bg-blue-900  hover:underline text-left text-xs" onclick="location.href = '{{ url_for('execute', id=script) }}'">Execute</button></li>
                                     <li><button type="button" class="pl-16 w-full p-1 hover:bg-red-900  hover:underline text-left text-xs"  onclick="location.href = '{{ url_for('delete', id=script) }}'">Delete</button></li>
                                 </ul>
