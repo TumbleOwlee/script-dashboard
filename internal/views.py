@@ -480,21 +480,18 @@ def upload(id):
 
     # Remove unwanted files
     for f in config['filesToRemove']:
-        filename = secure_filename(f)
-        if filename == ".env":
+        if f == ".env":
             continue
-        path = os.path.join(new_script_dir, filename)
-        if os.path.isdir(path):
-            shutil.rmtree(path)
-        else:
-            os.remove(path)
+        path = os.path.abspath(os.path.join(new_script_dir, f))
+        if path.startswith(new_script_dir):
+            if os.path.isdir(path):
+                shutil.rmtree(path)
+            else:
+                os.remove(path)
 
     # Store uploaded files
     for f in config['files']:
-        filename = secure_filename(f.filename)
-        if filename == ".env":
-            filename = "env"
-        filepath = os.path.join(new_script_dir, filename)
+        filepath = os.path.join(new_script_dir, f)
         f.save(filepath)
         shell.run([['chown', '-R', f"{config['username']}:{config['username']}", filepath]])
     config['files'] = None
