@@ -533,7 +533,6 @@ def upload(id):
 
         shell.run([
             ['systemctl', 'enable', new_systemd_service],
-            ['systemctl', 'start', new_systemd_service]
         ])
 
     # Setup crontab entry
