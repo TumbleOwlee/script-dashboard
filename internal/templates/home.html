@@ -5,8 +5,8 @@
 {% block content %}
 <div class="p-3 grid grid-cols-1 xl:grid-cols-2 w-full gap-4 overflow-auto">
     {% for update in updates %}
-    <div class="flex flex-col  flex-auto p-3 w-full bg-stone-800 gap-2">
-        <div class="flex w-full text-blue-400">{{ update['title'] }}</div>
+    <div class="flex flex-col  flex-auto p-3 w-full bg-stone-200 dark:bg-stone-800 gap-2 border border-stone-700 bg:border-stone-300">
+        <div class="flex w-full font-bold text-blue-800 dark:text-blue-400">{{ update['title'] }}</div>
         {% for paragraph in update['paragraphs'] %}
         <div class="flex w-full text-xs">{{ paragraph }}</div>
         {% endfor %}
