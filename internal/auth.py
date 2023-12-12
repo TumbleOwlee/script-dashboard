@@ -1,6 +1,6 @@
 from flask import render_template, request, redirect, url_for
 from flask_login import LoginManager, UserMixin, login_user, login_required, current_user, logout_user
-from application import app
+from internal.appl import app
 from simplepam import authenticate
 import pwd
 

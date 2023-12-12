@@ -3,11 +3,11 @@ import re
 import yaml
 import shutil
 import subprocess
-from shell import Shell
+from internal.shell import Shell
 from werkzeug.utils import secure_filename
 from flask import render_template, request, redirect, url_for
 from flask_login import login_required, current_user
-from application import app
+from internal.appl import app
 
 SYSTEM_SHELL: Shell = Shell(working_directory='/')
 
@@ -135,7 +135,7 @@ def list_dir(path, recursive: bool = False):
 def home():
     username = current_user.id
     updates = None
-    with open('updates.yml', 'r') as f:
+    with open('config/updates.yml', 'r') as f:
         updates = yaml.load(f, yaml.FullLoader)
     scripts = list_dir(os.path.join(app.custom_config['workspace'], username))
     return render_template('home.html', username=current_user.id, scripts=scripts, updates=updates['updates'])

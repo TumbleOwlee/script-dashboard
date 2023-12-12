@@ -3,10 +3,10 @@ import yaml
 
 from flask import redirect, url_for, render_template, request
 from flask_login import current_user
-from application import app
 from argparse import ArgumentParser
-from views import *
-from auth import *
+from internal.appl import app
+from internal.views import *
+from internal.auth import *
 
 
 @app.route("/")
@@ -47,7 +47,7 @@ if __name__ == '__main__':
         print(e)
 
 else:
-    with open('config.yml') as file:
+    with open('config/config.yml') as file:
         app.custom_config = yaml.load(file, yaml.FullLoader)
         if not os.path.exists(app.custom_config['workspace']):
             os.mkdir(app.custom_config['workspace'])
