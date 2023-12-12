@@ -125,8 +125,8 @@
         }
 
         function showDeletePopup(e) {
-            select("#delete-yes").href = e.location;
-            select("#delete-script-name").innerHTML = e.scriptName;
+            select("#delete-yes").href = e.dataset.href;
+            select("#delete-script-name").innerHTML = e.dataset.name;
             removeClass("#delete-popup", "hidden");
         }
 
@@ -263,7 +263,7 @@
                                     <li><button id="{{ script }}-start" name="{{ script }}" type="button" class="pl-16 w-full p-1 hover:bg-blue-900  hover:underline text-left text-xs" onclick="handleStartStop(this)">Start</button></li>
                                     <li><button type="button" class="pl-16 w-full p-1 hover:bg-blue-900  hover:underline text-left text-xs" onclick="location.href = '{{ url_for('execute', id=script) }}'">Execute</button></li>
                                     <li><button type="button" class="pl-16 w-full p-1 hover:bg-blue-900  hover:underline text-left text-xs" onclick="location.href = '{{ url_for('download', id=script) }}'">Download</button></li>
-                                    <li><button type="button" class="pl-16 w-full p-1 hover:bg-red-900  hover:underline text-left text-xs"  location="{{ url_for('delete', id=script) }}" scriptName="{{ script }}" onclick="showDeletePopup(this)">Delete</button></li>
+                                    <li><button type="button" class="pl-16 w-full p-1 hover:bg-red-900  hover:underline text-left text-xs"  data-href="{{ url_for('delete', id=script) }}" data-name="{{ script }}" onclick="showDeletePopup(this)">Delete</button></li>
                                 </ul>
                             </div>
                             {% endfor %}
