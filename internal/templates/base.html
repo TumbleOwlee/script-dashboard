@@ -124,6 +124,17 @@
             })(elem, value.toLowerCase())
         }
 
+        function showDeletePopup(e) {
+            select("#delete-yes").href = e.location;
+            select("#delete-script-name").innerHTML = e.scriptName;
+            removeClass("#delete-popup", "hidden");
+        }
+
+        function handleDelete(e) {
+            location.href = e.href;
+            addClass("#delete-popup", "hidden");
+        }
+
         runAfterLoad(() => { checkStatus(); window.setInterval(checkStatus, 30 * 1000); })
     </script>
     {% block head %}{% endblock %}
@@ -158,7 +169,7 @@
         <div id="navigation" class="flex w-80 h-full flex-none grow-0 shrink-0 dark:bg-stone-800 justify-center">
             <div class="flex w-full h-full flex-col gap-0 space-x-0 no-scrollbar overflow-auto snap-y">
                 <!-- header -->
-                <div class="flex grow-0 flex-none w-full dark:bg-stone-900 h-8 border-y border-stone-500">
+                <div class="snap-center flex grow-0 flex-none w-full dark:bg-stone-900 h-8 border-y border-stone-500">
                     <div class="flex flex-col w-full h-full justify-center items-center">
                         <div class="text-sm">Created by David Loewe</div>
                     </div>
@@ -166,7 +177,7 @@
                 <div class="flex grow-0 flex-none h-4 w-full"></div>
                 <!-- logo line -->
                 <div class="flex grow-0 flex-none w-full h-20 p-3">
-                    <div class="flex flex-row h-full w-full gap-x-4 px-2 items-center justify-center">
+                    <div class="snap-center flex flex-row h-full w-full gap-x-4 px-2 items-center justify-center">
                         <div>
                             <p class="text-lg font-bold text-blue-400">Script Dashboard</p>
                             <p class="text-center text-sm text-stone-300">Version 0.1.0</p>
@@ -175,14 +186,14 @@
                 </div>
                 <div class="flex grow-0 flex-none h-4 w-full"></div>
                 <div class="flex flex-row w-full flex-nowrap px-6 py-4 justify-center items-center">
-                    <button type="button" class="w-full h-8 dark:bg-stone-900 flex flex-row items-center px-6 border border-stone-700 justify-center items-center" disabled="true">
+                    <button type="button" class="snap-center w-full h-8 dark:bg-stone-900 flex flex-row items-center px-6 border border-stone-700 justify-center items-center" disabled="true">
                         <div class="flex grow-0 flex-none text-blue-400 text-sm">Logged in as</div>
                         <div class="flex grow-0 flex-none pl-2 text-sm">{{ username }}</div>
                     </button>
                 </div>
                 <!-- home -->
                 <div class="flex flex-none w-full h-8 flex-row px-6">
-                    <button class="px-2 flex w-full h-full flex-none shrink-0 grow-0 w-36 hover:bg-blue-900 flex-row items-center px-6 bg-stone-900  border border-stone-700" onclick="location.href = '{{ url_for('home') }}'">
+                    <button class="snap-center px-2 flex w-full h-full flex-none shrink-0 grow-0 w-36 hover:bg-blue-900 flex-row items-center px-6 bg-stone-900  border border-stone-700" onclick="location.href = '{{ url_for('home') }}'">
                         <div class="w-5">
                             <svg class="w-4 h-4 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
                                 <path d="m19.707 9.293-2-2-7-7a1 1 0 0 0-1.414 0l-7 7-2 2a1 1 0 0 0 1.414 1.414L2 10.414V18a2 2 0 0 0 2 2h3a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h3a2 2 0 0 0 2-2v-7.586l.293.293a1 1 0 0 0 1.414-1.414Z"/>
@@ -193,7 +204,7 @@
                 </div>
                 <div class="flex grow-0 flex-none h-1 w-full"></div>
                 <div class="flex flex-none w-full h-8 flex-row px-6">
-                    <button class="px-2 flex w-full h-full flex-none shrink-0 grow-0 w-36 hover:bg-blue-900 flex-row items-center px-6 bg-stone-900  border border-stone-700" onclick="location.href = '{{ url_for('new_script') }}'">
+                    <button class="snap-center px-2 flex w-full h-full flex-none shrink-0 grow-0 w-36 hover:bg-blue-900 flex-row items-center px-6 bg-stone-900  border border-stone-700" onclick="location.href = '{{ url_for('new_script') }}'">
                         <svg class="w-4 h-4 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M5 5V.13a2.96 2.96 0 0 0-1.293.749L.879 3.707A2.96 2.96 0 0 0 .13 5H5Z"/>
                             <path d="M6.737 11.061a2.961 2.961 0 0 1 .81-1.515l6.117-6.116A4.839 4.839 0 0 1 16 2.141V2a1.97 1.97 0 0 0-1.933-2H7v5a2 2 0 0 1-2 2H0v11a1.969 1.969 0 0 0 1.933 2h12.134A1.97 1.97 0 0 0 16 18v-3.093l-1.546 1.546c-.413.413-.94.695-1.513.81l-3.4.679a2.947 2.947 0 0 1-1.85-.227 2.96 2.96 0 0 1-1.635-3.257l.681-3.397Z"/>
@@ -206,7 +217,7 @@
                 </div>
                 <div class="flex grow-0 flex-none h-1 w-full"></div>
                 <div class="flex flex-none w-full h-8 flex-row px-6">
-                    <button class="px-2 flex w-full h-full flex-none shrink-0 grow-0 w-36 hover:bg-blue-900 flex-row items-center px-6 bg-stone-900  border border-stone-700" onclick="location.href = '{{ url_for('logout') }}'">
+                    <button class="snap-center px-2 flex w-full h-full flex-none shrink-0 grow-0 w-36 hover:bg-blue-900 flex-row items-center px-6 bg-stone-900  border border-stone-700" onclick="location.href = '{{ url_for('logout') }}'">
                         <svg class="w-4 h-4 text-gray-800 dark:text-white" fill="#dc2626" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path d="M7.707,8.707,5.414,11H17a1,1,0,0,1,0,2H5.414l2.293,2.293a1,1,0,1,1-1.414,1.414l-4-4a1,1,0,0,1,0-1.414l4-4A1,1,0,1,1,7.707,8.707ZM21,1H13a1,1,0,0,0,0,2h7V21H13a1,1,0,0,0,0,2h8a1,1,0,0,0,1-1V2A1,1,0,0,0,21,1Z"/>
                         </svg>
@@ -252,7 +263,7 @@
                                     <li><button id="{{ script }}-start" name="{{ script }}" type="button" class="pl-16 w-full p-1 hover:bg-blue-900  hover:underline text-left text-xs" onclick="handleStartStop(this)">Start</button></li>
                                     <li><button type="button" class="pl-16 w-full p-1 hover:bg-blue-900  hover:underline text-left text-xs" onclick="location.href = '{{ url_for('execute', id=script) }}'">Execute</button></li>
                                     <li><button type="button" class="pl-16 w-full p-1 hover:bg-blue-900  hover:underline text-left text-xs" onclick="location.href = '{{ url_for('download', id=script) }}'">Download</button></li>
-                                    <li><button type="button" class="pl-16 w-full p-1 hover:bg-red-900  hover:underline text-left text-xs"  onclick="location.href = '{{ url_for('delete', id=script) }}'">Delete</button></li>
+                                    <li><button type="button" class="pl-16 w-full p-1 hover:bg-red-900  hover:underline text-left text-xs"  location="{{ url_for('delete', id=script) }}" scriptName="{{ script }}" onclick="showDeletePopup(this)">Delete</button></li>
                                 </ul>
                             </div>
                             {% endfor %}
@@ -265,6 +276,20 @@
         <!-- right content view -->
         <div class="flex-1 border border-stone-500">
             {% block content %}{% endblock %}
+        </div>
+    </div>
+    <div id="delete-popup" class="hidden absolute h-screen w-screen flex flex-row justify-center justify-items-center bg-[#04040475]">
+        <div class='flex flex-col w-full h-full justify-center items-center gap-4 bg-stone-900 bg-[#04040475]'>
+            <form action='login' method='POST'>
+                <div class='flex flex-col w-96 shrink-0 grow flex-none bg-stone-950 border border-stone-600 justify-center items-center px-4 py-4 gap-4'>
+                    <div class="flex flex-none grow-0 shrink-0 text-md text-blue-400">Are you sure to delete the script?</div>
+                    <div id='delete-script-name' class="flex flex-none grow-0 shrink-0 text-md text-blue-400"></div>
+                    <div class="flex flex-row justify-center items-center shrink-0 px-2 w-full gap-4">
+                        <button type="button" class="pl-16 w-full p-1 bg-stone-800 hover:bg-red-900  hover:underline text-left text-xs border border-stone-600" onclick="addClass('#delete-popup', 'hidden')">No</button>
+                        <button id="delete-yes" type="button" class="pl-16 w-full p-1 bg-stone-800 hover:bg-red-900  hover:underline text-left text-xs border border-stone-600" onclick="handleDelete(this)">Yes</button>
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
 </body>

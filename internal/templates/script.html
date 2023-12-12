@@ -361,7 +361,7 @@
     </div>
     <div class="flex grow-0 shrink-0 w-full flex-row">
         <div class="flex flex-none h-full grow-0 shrink-0 text-3xl">
-            {% if config['name'] == '' %}
+            {% if not config['name'] or config['name'] == '' %}
             Create Script
             {% else %}
             Edit script
