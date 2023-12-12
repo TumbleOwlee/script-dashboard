@@ -4,7 +4,6 @@ import yaml
 import shutil
 import subprocess
 from internal.shell import Shell
-from werkzeug.utils import secure_filename
 from flask import render_template, request, redirect, url_for, send_from_directory
 from flask_login import login_required, current_user
 from internal.appl import app
@@ -15,7 +14,8 @@ SYSTEMD_CONFIG = {
     'Unit': [
         {
             'name': "Description",
-            'placeholder': "Human readable title of the unit."
+            'placeholder': "Human readable title of the unit. (Required)",
+            'required': True
         },
         {
             "name": "Documentation",
@@ -65,7 +65,8 @@ SYSTEMD_CONFIG = {
     "Install": [
         {
             "name": "WantedBy",
-            "placeholder": "List of units that have 'wants' dependencies to this unit."
+            "placeholder": "List of units that have 'wants' dependencies to this unit.",
+            "default": "default.target"
         },
         {
             "name": "RequiredBy",

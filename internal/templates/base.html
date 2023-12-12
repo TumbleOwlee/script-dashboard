@@ -283,11 +283,12 @@
             <form action='login' method='POST'>
                 <div class='flex flex-col w-96 shrink-0 grow flex-none bg-stone-950 border border-stone-600 justify-center items-center px-4 py-4 gap-4'>
                     <div class="flex flex-none grow-0 shrink-0 text-md text-blue-400">Are you sure to delete the script?</div>
-                    <div id='delete-script-name' class="flex flex-none grow-0 shrink-0 text-md text-blue-400"></div>
+                    <div id='delete-script-name' class="flex flex-none grow-0 shrink-0 text-md text-red-600"></div>
                     <div class="flex flex-row justify-center items-center shrink-0 px-2 w-full gap-4">
-                        <button type="button" class="pl-16 w-full p-1 bg-stone-800 hover:bg-red-900  hover:underline text-left text-xs border border-stone-600" onclick="addClass('#delete-popup', 'hidden')">No</button>
+                        <button type="button" class="pl-16 w-full p-1 bg-stone-800 hover:bg-green-900  hover:underline text-left text-xs border border-stone-600" onclick="addClass('#delete-popup', 'hidden')">No</button>
                         <button id="delete-yes" type="button" class="pl-16 w-full p-1 bg-stone-800 hover:bg-red-900  hover:underline text-left text-xs border border-stone-600" onclick="handleDelete(this)">Yes</button>
                     </div>
+                    <div id='delete-script-name' class="flex flex-none grow-0 shrink-0 text-md text-white text-xs">Tip: Download the sources upfront for possible recovery.</div>
                 </div>
             </form>
         </div>
