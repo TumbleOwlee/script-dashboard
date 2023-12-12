@@ -87,7 +87,7 @@
                         const clone = template.content.cloneNode(true);
                         elem.appendChild(clone);
                     }
-                    var btnText = select("." + elem.id + "-start");
+                    var btnText = select("#" + elem.id + "-start");
                     if (btnText != null) {
                         btnText.innerHTML = text;
                         btnText.disabled = false;
