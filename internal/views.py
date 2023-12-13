@@ -557,7 +557,7 @@ def upload(id):
 
     # Setup crontab entry
     elif config['scheduling'] == 'crontab':
-        crontab_line = f"{config['crontab']['minute']} {config['crontab']['hour']} {config['crontab']['day']} {config['crontab']['month']} {config['crontab']['weekday']} \"sudo -u {config['username']} bash {env_dir}/execute.sh\""
+        crontab_line = f"{config['crontab']['minute']} {config['crontab']['hour']} {config['crontab']['day']} {config['crontab']['month']} {config['crontab']['weekday']} \"sudo -u {config['username']} bash {env_dir}/execute.sh service\""
         env_crontab = os.path.join(env_dir, f"{config['username']}_{config['name']}_generated".lower())
         with open(env_crontab, 'w') as f:
             f.write(f"# Managed by Script Dashboard\n{crontab_line}")
