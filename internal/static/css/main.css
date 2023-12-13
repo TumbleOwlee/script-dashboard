@@ -664,6 +664,26 @@ video {
   height: 100vh;
 }
 
+.h-32 {
+  height: 8rem;
+}
+
+.h-36 {
+  height: 9rem;
+}
+
+.h-7 {
+  height: 1.75rem;
+}
+
+.h-\[29\] {
+  height: 29;
+}
+
+.h-28 {
+  height: 7rem;
+}
+
 .w-1 {
   width: 0.25rem;
 }
@@ -1138,14 +1158,6 @@ video {
 
 .line-through {
   text-decoration-line: line-through;
-}
-
-.opacity-50 {
-  opacity: 0.5;
-}
-
-.opacity-75 {
-  opacity: 0.75;
 }
 
 .opacity-80 {

@@ -1,0 +1,16 @@
+[Unit]
+Description=Script Management Dashboard
+
+[Install]
+WantedBy=default.target
+
+[Service]
+User=root
+ExecStart=/usr/bin/python3 -m flask  --app main --debug run -h 0.0.0.0 -p 5000 --cert certificate/cert.pem --key certificate/key.pem
+WorkingDirectory=<WorkingDirectory>
+Type=simple
+ExitType=main
+RemainAfterExit=no
+Restart=on-failure
+RestartSec=30
+NotifyAccess=none
