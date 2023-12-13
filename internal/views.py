@@ -152,10 +152,10 @@ def enable_service(id, enable: bool):
     username = current_user.id
     script_dir = os.path.join(app.custom_config['workspace'], username, id)
     if os.path.exists(script_dir):
-        with open(os.path.join(script_dir, '.env/config.yml')) as f:
+        with open(os.path.join(script_dir, '.env/config.yml'), 'r') as f:
             config = yaml.load(f, yaml.FullLoader)
             if config['scheduling'] == 'systemd':
-                service_file = f"{username}_{id}.service"
+                service_file = f"{username}_{id}_generated.service"
                 if not enable:
                     SYSTEM_SHELL.run([['systemctl', 'stop', service_file.lower()]])
                 returncode, output = SYSTEM_SHELL.check_output(['systemctl', 'enable' if enable else "disable", service_file.lower()])
@@ -164,9 +164,9 @@ def enable_service(id, enable: bool):
                 else:
                     return {'id': id, 'success': False}
             elif config['scheduling'] == 'crontab':
-                crontab_file = os.path.join(app.custom_config['crontab'], f"{username}_{id}".lower())
+                crontab_file = os.path.join(app.custom_config['crontab'], f"{username}_{id}_generated".lower())
                 if enable:
-                    shutil.copy2(os.path.join(script_dir, '.env', f"{username}_{id}".lower()), crontab_file)
+                    shutil.copy2(os.path.join(script_dir, '.env', f"{username}_{id}_generated".lower()), crontab_file)
                 else:
                     if os.path.exists(crontab_file):
                         os.remove(crontab_file)
@@ -191,10 +191,10 @@ def start_service(id, start: bool):
     username = current_user.id
     script_dir = os.path.join(app.custom_config['workspace'], username, id)
     if os.path.exists(script_dir):
-        with open(os.path.join(script_dir, '.env/config.yml')) as f:
+        with open(os.path.join(script_dir, '.env/config.yml'), 'r') as f:
             config = yaml.load(f, yaml.FullLoader)
             if config['scheduling'] == 'systemd':
-                service_file = f"{username}_{id}.service"
+                service_file = f"{username}_{id}_generated.service"
                 returncode, output = SYSTEM_SHELL.check_output(['systemctl', 'start' if start else "stop", service_file.lower()])
                 if returncode == 0:
                     return {'id': id, 'success': True}
@@ -222,17 +222,17 @@ def status(id):
     username = current_user.id
     script_dir = os.path.join(app.custom_config['workspace'], username, id)
     if os.path.exists(script_dir):
-        with open(os.path.join(script_dir, '.env/config.yml')) as f:
+        with open(os.path.join(script_dir, '.env/config.yml'), 'r') as f:
             config = yaml.load(f, yaml.FullLoader)
             if config['scheduling'] == 'systemd':
-                service_file = f"{username}_{id}.service"
+                service_file = f"{username}_{id}_generated.service"
                 returncode, active_output = SYSTEM_SHELL.check_output(['systemctl', 'is-active', service_file.lower()])
                 active_output = active_output.replace('\n', '')
                 returncode, enable_output = SYSTEM_SHELL.check_output(['systemctl', 'is-enabled', service_file.lower()])
                 enable_output = enable_output.replace('\n', '')
                 return {'id': id, 'active': active_output, 'enable': enable_output}
             elif config['scheduling'] == 'crontab':
-                crontab_file = os.path.join(app.custom_config['crontab'], f"{username}_{id}".lower())
+                crontab_file = os.path.join(app.custom_config['crontab'], f"{username}_{id}_generated".lower())
                 if os.path.exists(crontab_file):
                     return {'id': id, 'active': 'active', 'enable': 'enabled'}
                 else:
@@ -249,10 +249,10 @@ def log(id):
     username = current_user.id
     script_dir = os.path.join(app.custom_config['workspace'], username, id)
     if os.path.exists(script_dir):
-        with open(os.path.join(script_dir, '.env/config.yml')) as f:
+        with open(os.path.join(script_dir, '.env/config.yml'), 'r') as f:
             config = yaml.load(f, yaml.FullLoader)
             if config['scheduling'] == 'systemd':
-                service_file = f"{username}_{id}.service"
+                service_file = f"{username}_{id}_generated.service"
                 returncode, output = SYSTEM_SHELL.check_output(['journalctl', '-n', '100', '-u', service_file.lower()])
                 return {'log': output}
             else:
@@ -269,7 +269,7 @@ def script(id):
     scripts = list_dir(os.path.join(app.custom_config['workspace'], username))
     script_dir = os.path.join(app.custom_config['workspace'], username, id)
     if os.path.exists(script_dir):
-        with open(os.path.join(script_dir, '.env/config.yml')) as f:
+        with open(os.path.join(script_dir, '.env/config.yml'), 'r') as f:
             config = yaml.load(f, yaml.FullLoader)
             config['files'] = list_files(script_dir)
             return render_template('script.html', username=current_user.id, config=config, systemd=SYSTEMD_CONFIG, scripts=scripts, interpreters=app.custom_config['interpreters'])
@@ -289,10 +289,10 @@ def script_dir_delete(username, id):
     script_dir = os.path.join(app.custom_config['workspace'], f"{username}/{id}")
     if os.path.exists(script_dir):
         shutil.rmtree(script_dir)
-    crontab_file = os.path.join(app.custom_config['crontab'], f"{username}_{id}")
+    crontab_file = os.path.join(app.custom_config['crontab'], f"{username}_{id}_generated")
     if os.path.exists(crontab_file):
         os.remove(crontab_file)
-    systemd_file = os.path.join(app.custom_config['systemd'], f"{username}_{id}.service".lower())
+    systemd_file = os.path.join(app.custom_config['systemd'], f"{username}_{id}_generated.service".lower())
     if os.path.exists(systemd_file):
         os.remove(systemd_file)
 
@@ -316,12 +316,12 @@ def execute(id):
     working_dir = os.path.join(app.custom_config['workspace'], username, id)
     script = os.path.join(working_dir, ".env", "execute.sh")
     if os.path.exists(script):
-        with open(os.path.join(working_dir, '.env/config.yml')) as f:
+        with open(os.path.join(working_dir, '.env/config.yml'), 'r') as f:
             config = yaml.load(f, yaml.FullLoader)
             try:
                 output = ''
                 if config['scheduling'] == 'systemd':
-                    service_file = f"{username}_{id}.service"
+                    service_file = f"{username}_{id}_generated.service"
                     returncode, output = SYSTEM_SHELL.check_output(['systemctl', 'is-active', service_file.lower()])
                     output = output.replace('\n', '')
                 if output != 'active':
@@ -445,14 +445,14 @@ def upload(id):
 
     # Paths for old entry
     old_script_dir = os.path.join(app.custom_config['workspace'], f"{config['username']}/{config['oldName']}")
-    old_crontab_file = os.path.join(app.custom_config['crontab'], f"{config['username']}_{config['oldName']}".lower())
-    old_systemd_service = f"{config['username']}_{config['oldName']}.service".lower()
+    old_crontab_file = os.path.join(app.custom_config['crontab'], f"{config['username']}_{config['oldName']}_generated".lower())
+    old_systemd_service = f"{config['username']}_{config['oldName']}_generated.service".lower()
     old_systemd_file = os.path.join(app.custom_config['systemd'], old_systemd_service)
 
     # Paths for new entry
     new_script_dir = os.path.join(app.custom_config['workspace'], f"{config['username']}/{config['name']}")
-    new_crontab_file = os.path.join(app.custom_config['crontab'], f"{config['username']}_{config['name']}".lower())
-    new_systemd_service = f"{config['username']}_{config['name']}.service".lower()
+    new_crontab_file = os.path.join(app.custom_config['crontab'], f"{config['username']}_{config['name']}_generated".lower())
+    new_systemd_service = f"{config['username']}_{config['name']}_generated.service".lower()
     new_systemd_file = os.path.join(app.custom_config['systemd'], new_systemd_service)
 
     # Path to .env directory
@@ -549,11 +549,10 @@ def upload(id):
             ])
         config["systemd"]["none"]["initialstate"] = "enabled"
 
-
     # Setup crontab entry
     elif config['scheduling'] == 'crontab':
         crontab_line = f"{config['crontab']['minute']} {config['crontab']['hour']} {config['crontab']['day']} {config['crontab']['month']} {config['crontab']['weekday']} \"sudo -u {config['username']} bash {env_dir}/execute.sh\""
-        env_crontab = os.path.join(env_dir, f"{config['username']}_{config['name']}".lower())
+        env_crontab = os.path.join(env_dir, f"{config['username']}_{config['name']}_generated".lower())
         with open(env_crontab, 'w') as f:
             f.write(f"# Managed by Script Dashboard\n{crontab_line}")
         shutil.copy2(env_crontab, new_crontab_file)
