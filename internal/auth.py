@@ -35,11 +35,12 @@ def request_loader(request):
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+
     if request.method == 'GET':
         if current_user.is_authenticated:
             return redirect(url_for('home'))
         else:
-            return render_template('login.html', error='')
+            return render_template('login.html', error='', userId=None)
 
     userId = str(request.form['user'])
     if authenticate(userId, str(request.form['password'])):
@@ -47,7 +48,7 @@ def login():
         login_user(user)
         return redirect(url_for('home'))
 
-    return render_template('login.html', error='Username and/or password was incorrect!')
+    return render_template('login.html', error='Username and/or password was incorrect!', userId=userId)
 
 
 @app.route('/logout')

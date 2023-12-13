@@ -17,7 +17,7 @@
                 <div class="flex flex-none grow-0 shrink-0 text-3xl text-blue-400">Login</div>
                 <div class="flex flex-row justify-center items-center shrink-0 px-2 w-full">
                     <label for="user" class="flex flex-none shrink-0 grow-0 w-20 text-sm">User</label>
-                    <input class="flex grow shrink px-2 h-8 bg-stone-900  border-stone-600 border text-xs" type="text" id="user" name="user" autocomplete="on" placeholder="Username">
+                    <input class="flex grow shrink px-2 h-8 bg-stone-900  border-stone-600 border text-xs" type="text" id="user" name="user" autocomplete="on" placeholder="Username" value="{{ userId if userId else "" }}">
                 </div>
                 <div class="flex flex-row justify-center items-center shrink-0 px-2 w-full">
                     <label for="password" class="flex flex-none shrink-0 grow-0 w-20 text-sm">Password</label>
