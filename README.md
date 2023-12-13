@@ -1,6 +1,6 @@
 # Script Dashboard
 
-This repository contains a simple script management dashboard created using [Flask]() and [Tailwindcss]().
+This repository contains a simple script management dashboard created using [Flask](https://flask.palletsprojects.com/en/3.0.x/) and [Tailwindcss](https://tailwindcss.com/).
 
 ## Quickstart
 
