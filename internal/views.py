@@ -366,7 +366,8 @@ def get_config_from_form(request):
         'install': request.form.get('install-script'),
         'files': [f for f in request.files.getlist('files') if f.filename != ''],
         'filesToRemove': [f for f in request.form.getlist('file-remove') if f != ''],
-        'arguments': request.form.get('cli-args')
+        'arguments': request.form.get('cli-args'),
+        'service-args': request.form.get('cli-service-args')
     }
 
     if config['scheduling'] == 'systemd':
@@ -510,6 +511,12 @@ def upload(id):
         f.write(f"cd {new_script_dir}\n")
         for e in config['environment']:
             f.write(f"export {e}={config['environment'][e]}\n")
+        f.write('if [ "$1" == "service" ]; then\n')
+        if config['interpreter']['name'] == "Native":
+            f.write(f"{entry_point_path} {config['arguments']} {config['service-args']} >>{output_file} 2>&1\n")
+        else:
+            f.write(f"{config['interpreter']['command']} {entry_point_path} {config['arguments']} {config['service-args']} >>{output_file} 2>&1\n")
+        f.write('else\n')
         if config['interpreter']['name'] == "Native":
             f.write(f"{entry_point_path} {config['arguments']} >>{output_file} 2>&1\n")
         else:
@@ -528,9 +535,9 @@ def upload(id):
                     for env in config['environment']:
                         f.write(f"Environment=\"{env}={config['environment'][env]}\"\n")
                     if config['interpreter']['name'] == "Native":
-                        f.write(f"ExecStart={entry_point_path} {config['arguments']}\n")
+                        f.write(f"ExecStart={entry_point_path} {config['arguments']} {config['service-args']}\n")
                     else:
-                        f.write(f"ExecStart={config['interpreter']['command']} {entry_point_path} {config['arguments']}\n")
+                        f.write(f"ExecStart={config['interpreter']['command']} {entry_point_path} {config['arguments']} {config['service-args']}\n")
                 for value in SYSTEMD_CONFIG[entry]:
                     if value["name"] == "WorkingDirectory":
                         working_dir = os.path.abspath(os.path.join(workspace, config['name'], config['systemd'][entry]['workingdirectory']))
@@ -547,7 +554,6 @@ def upload(id):
             shell.run([
                 ['systemctl', 'start', new_systemd_service],
             ])
-        config["systemd"]["none"]["initialstate"] = "enabled"
 
     # Setup crontab entry
     elif config['scheduling'] == 'crontab':

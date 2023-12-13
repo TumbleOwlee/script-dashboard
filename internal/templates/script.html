@@ -154,20 +154,6 @@
         runAfterLoad(() => { showNoDetails(document.querySelector("#none-btn")); })
     {% endif %}
 
-    function addArgumentToList(ev, elem) {
-        if (ev.key == "Enter") {
-            if (elem.value != "") {
-                let argument = elem.value
-                const template = select("#argument");
-                const clone = template.content.cloneNode(true);
-                select("button", clone).innerHTML = argument;
-                select("input", clone).value = argument;
-                select("#args-list").appendChild(clone);
-                elem.value = ""
-            }
-        }
-    }
-
     function updateLog() {
         const url = "/log/{{ config['oldName'] }}";
         get(url).then((data) => {
@@ -425,7 +411,11 @@
                     </div>
                     <div class="flex w-full flex-none grow-0 shrink-0 flex-row flex-wrap items-center gap-4 pl-4">
                         <label for="cli-args" class="flex flex-none shrink-0 grow-0 w-20 text-sm">Arguments</label>
-                        <input style="font-family: monospace" class="flex grow min-w-8 shrink px-2 h-8 bg-stone-900  border-stone-600 border text-xs" type="text" id="cli-args" name="cli-args" placeholder="Specify an argument and press enter to confirm." value="{{ config["arguments"] }}">
+                        <input style="font-family: monospace" class="flex grow min-w-8 shrink px-2 h-8 bg-stone-900  border-stone-600 border text-xs" type="text" id="cli-args" name="cli-args" placeholder="List of arguments for execution." value="{{ config["arguments"] }}">
+                    </div>
+                    <div class="flex w-full flex-none grow-0 shrink-0 flex-row flex-wrap items-center gap-4 pl-4">
+                        <label for="cli-service-args" class="flex flex-none shrink-0 grow-0 w-20 text-sm">Service Arg.</label>
+                        <input style="font-family: monospace" class="flex grow min-w-8 shrink px-2 h-8 bg-stone-900  border-stone-600 border text-xs" type="text" id="cli-service-args" name="cli-service-args" placeholder="Additional arguments only used if executed as a service." value="{{ config["service-args"] }}">
                     </div>
                     <div class="flex w-full flex-none grow-0 shrink-0 flex-row justify-center items-center gap-4 pl-4">
                         <label for="interpreter" class="flex flex-none shrink-0 grow-0 w-20 text-sm">Interpreter</label>
