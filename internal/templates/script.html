@@ -248,7 +248,7 @@
 
 <template id="no-details">
     <div class='pt-4 w-full'>
-        <button type='button' onclick="clickNextSibling(this)"
+        <button type='button' onclick="removeClass('#script-submit-spinner', 'hidden'); clickNextSibling(this)"
             class="flex flex-row grow h-full  bg-stone-900 justify-center items-center hover:bg-blue-900 border border-stone-600 gap-2 w-full" >
             <div class="flex flex-row w-10 h-10 items-center justify-center">
                 <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 21 16">
@@ -293,7 +293,7 @@
         </div>
     </div>
     <div class='pt-4 w-full'>
-        <button type='button' onclick="clickNextSibling(this)"
+        <button type='button' onclick="removeClass('#script-submit-spinner', 'hidden'); clickNextSibling(this);"
             class="flex flex-row grow h-full  bg-stone-900 justify-center items-center hover:bg-blue-900 border border-stone-600 gap-2 w-full" >
             <div class="flex flex-row w-10 h-10 items-center justify-center">
                 <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 21 16">
@@ -342,7 +342,7 @@
         {% endfor %}
     </div>
     <div class='pt-4 w-full'>
-        <button type='button' onclick="clickNextSibling(this)"
+        <button type='button' onclick="removeClass('#script-submit-spinner', 'hidden'); clickNextSibling(this)"
             class="flex flex-row grow h-full  bg-stone-900 justify-center items-center hover:bg-blue-900 border border-stone-600 gap-2 w-full" >
             <div class="flex flex-row w-10 h-10 items-center justify-center">
                 <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 21 16">
@@ -360,167 +360,178 @@
     </div>
 </template>
 
-<div class="p-4 flex flex-col w-full h-full gap-4 no-scrollbar overflow-auto">
-    <div class="flex grow-0 shrink-0 w-full h-4 flex-row gap-2">
-        <div class="flex flex-none h-full grow-0 shrink-0 text-sm text-blue-400">Scripts</div>
-        <div class="flex flex-none h-full grow-0 shrink-0 text-sm">></div>
-        <div id='name-title' class="flex flex-none h-full grow-0 shrink-0 text-sm">
-            {% if config['name'] == '' %}
-            New Script
-            {% else %}
-            {{ config['name'] }}
-            {% endif %}
-        </div>
-        <div class="flex flex-1 grow shrink w-1 h-full"></div>
-    </div>
-    <div class="flex grow-0 shrink-0 w-full flex-row">
-        <div class="flex flex-none h-full grow-0 shrink-0 text-3xl">
-            {% if not config['name'] or config['name'] == '' %}
-            Create Script
-            {% else %}
-            Edit script
-            {% endif %}
-        </div>
-        <div class="flex flex-1 grow shrink w-1 h-full"></div>
-    </div>
-    {% if "error" in config and config["error"] != "" %}
-    <div class="flex w-full flex-row  bg-red-800 border border-red-400 px-2 py-1 text-xs justify-center">
-        {{ config["error"] }}
-    </div>
-    {% endif %}
-    <div class="flex grow-0 shrink-0  p-3 w-full bg-stone-800 border border-stone-600">
-        <form class="w-full" action="/script/{{ config['name'] }}", method='POST' enctype="multipart/form-data" onkeypress="handleSubmitForm(event)">
-            <input class="hidden" name="old-name" value="{{ config['oldName'] }}">
-            <div class="flex w-full flex-col gap-2">
-                <div class="flex flow-col justify-center items-center {% if not config["oldName"] or config["oldName"] == "" %} hidden {% endif %}" id="log-spinner" role="status">
-                    <svg aria-hidden="true" class="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/>
-                        <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/>
-                    </svg>
-                    <span class="sr-only">Loading...</span>
-                </div>
-                <div id="log-header" class="pb-1 flex w-full flex-none grow-0 shrink-0 text-blue-400 hidden">Log</div>
-                <textarea id="log-textarea" disabled="true" class="border border-stone-500 flex w-full bg-stone-900 p-2 text-xs hidden" style="font-family: monospace" rows='6'></textarea>
-                <div class="flex flex-row w-full h-4" id="refresh-container">
-                    <div class="flex grow shrink h-full"></div>
-                    <div class="flex shrink-0 grow-0 h-full text-xs pr-4 hidden" id="refresh-text">Refresh in 10s</div>
-                </div>
-                <div class="pb-1 flex w-full flex-none grow-0 shrink-0 text-blue-400">General</div>
-                <div class="flex w-full flex-none grow-0 shrink-0 flex-row justify-center items-center gap-4 pl-4">
-                    <label for="name" class="flex flex-none shrink-0 grow-0 w-20 text-sm">Name</label>
-                    <input style="font-family: monospace" class="flex grow w-full shrink px-2 h-8 bg-stone-900  border-stone-600 border text-xs" type="text" id="name" name="name" placeholder="e.g. myscript (only characters, numbers and underscores allowed)" value="{{ config['name'] }}" pattern="[a-zA-Z0-9_\-]+" required onkeyup="updateName(this)">
-                </div>
-                <div class="flex w-full flex-none grow-0 shrink-0 flex-row justify-center items-center gap-4 pl-4">
-                    <label for="entrypoint" class="flex flex-none shrink-0 grow-0 w-20 text-sm">Entrypoint</label>
-                    <input style="font-family: monospace" class="flex grow w-full shrink px-2 h-8 bg-stone-900  border-stone-600 border text-xs" type="text" id="entrypoint" name="entrypoint" placeholder="e.g. myscript.py" value="{{ config['entryPoint'] }}">
-                </div>
-                <div class="flex w-full flex-none grow-0 shrink-0 flex-row flex-wrap items-center gap-4 pl-4">
-                    <label for="cli-args" class="flex flex-none shrink-0 grow-0 w-20 text-sm">Arguments</label>
-                    <input style="font-family: monospace" class="flex grow min-w-8 shrink px-2 h-8 bg-stone-900  border-stone-600 border text-xs" type="text" id="cli-args" name="cli-args" placeholder="Specify an argument and press enter to confirm." value="{{ config["arguments"] }}">
-                </div>
-                <div class="flex w-full flex-none grow-0 shrink-0 flex-row justify-center items-center gap-4 pl-4">
-                    <label for="interpreter" class="flex flex-none shrink-0 grow-0 w-20 text-sm">Interpreter</label>
-                    <select style="font-family: monospace" class="flex grow w-full shrink px-2 h-8 bg-stone-900  border-stone-600 border text-xs" id="interpreter" name="interpreter">
-                        {% for interpreter in interpreters %}
-                            {% if 'interpreter' in config and config['interpreter']['name'] == interpreter %}
-                            <option value="{{ interpreter }}" class="text-sm" selected="selected">{{ interpreter }}</option>
-                            {% else %}
-                                <option value="{{ interpreter }}" class="text-sm">{{ interpreter }}</option>
-                            {% endif %}
-                        {% endfor %}
-                    </select>
-                </div>
-                {% if config['files'] %}
-                <div class="pt-4 pb-1 flex w-full flex-none grow-0 shrink-0 text-blue-400">Stored files</div>
-                <div class="flex flex-row w-full flex-wrap justify-start gap-2">
-                    {% for f in config['files'] %}
-                    <div class="flex flex-row h-8 shrink-0 items-center bg-stone-900  border border-stone-600 justify-center px-3 gap-2">
-                        <button type='button' class='w-4 h-full' onclick="toggleOutlineFile(this, '{{ f }}')">
-                            <svg class="w-4 h-4 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 20">
-                                <path d="M17 4h-4V2a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v2H1a1 1 0 0 0 0 2h1v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V6h1a1 1 0 1 0 0-2ZM7 2h4v2H7V2Zm1 14a1 1 0 1 1-2 0V8a1 1 0 0 1 2 0v8Zm4 0a1 1 0 0 1-2 0V8a1 1 0 0 1 2 0v8Z"/>
-                            </svg>
-                        </button>
-                        <input style="font-family: monospace" class="text-sm hidden" type="text" name="file-remove" value="">
-                        <div class='text-xs'>{{ f }}</div>
-                    </div>
-                    {% endfor %}
-                </div>
+<div class="w-full h-full relative">
+    <div class="p-4 flex flex-col w-full h-full gap-4 no-scrollbar overflow-auto">
+        <div class="flex grow-0 shrink-0 w-full h-4 flex-row gap-2">
+            <div class="flex flex-none h-full grow-0 shrink-0 text-sm text-blue-400">Scripts</div>
+            <div class="flex flex-none h-full grow-0 shrink-0 text-sm">></div>
+            <div id='name-title' class="flex flex-none h-full grow-0 shrink-0 text-sm">
+                {% if config['name'] == '' %}
+                New Script
+                {% else %}
+                {{ config['name'] }}
                 {% endif %}
-
-                <div class="pt-4 pb-1 flex w-full flex-none grow-0 shrink-0 text-blue-400">Upload files</div>
-                <div class="flex flex-row w-full flex-none grow-0 shrink-0 h-14 gap-2">
-                    <button id='upload-btn' type='button' onclick="clickNextSibling(this)"
-                        class="flex flex-row grow h-full  bg-stone-900 justify-center items-center hover:bg-blue-900 border border-stone-600 gap-2" >
-                        <div class="flex flex-row w-10 h-10 items-center justify-center">
-                            <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="m14.707 4.793-4-4a1 1 0 0 0-1.416 0l-4 4a1 1 0 1 0 1.416 1.414L9 3.914V12.5a1 1 0 0 0 2 0V3.914l2.293 2.293a1 1 0 0 0 1.414-1.414Z"/>
-                                <path d="M18 12h-5v.5a3 3 0 0 1-6 0V12H2a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2Zm-3 5a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"/>
-                            </svg>
-                        </div>
-                        <div>Upload</div>
-                    </button>
-                    <input style="font-family: monospace" type="file" name="files" id="files" class='hidden' multiple='multiple' onchange="updateFileList()">
-                </div>
-                <div class="flex flex-row w-full flex-wrap justify-start gap-2" id='files-list'></div>
-                <div class="pt-4 pb-1 flex w-full flex-none grow-0 shrink-0 text-blue-400">Run Commands</div>
-                <div class="flex flex-row w-full flex-none grow-0 shrink-0">
-                    <div class="w-full">
-                        <textarea name='install-script' id="install-script" style="font-family: monospace" class="border border-white  flex w-full bg-stone-900 p-2 text-xs" rows='8' placeholder="Run bash commands in the script project directory, e.g. to unpack an uploaded ZIP archive..." value="{{ config['install'] if 'install' in config and config['install'] != None else '' }}">{{ config['install'] if 'install' in config and config['install'] != None else '' }}</textarea>
+            </div>
+            <div class="flex flex-1 grow shrink w-1 h-full"></div>
+        </div>
+        <div class="flex grow-0 shrink-0 w-full flex-row">
+            <div class="flex flex-none h-full grow-0 shrink-0 text-3xl">
+                {% if not config['name'] or config['name'] == '' %}
+                Create Script
+                {% else %}
+                Edit script
+                {% endif %}
+            </div>
+            <div class="flex flex-1 grow shrink w-1 h-full"></div>
+        </div>
+        {% if "error" in config and config["error"] != "" %}
+        <div class="flex w-full flex-row  bg-red-800 border border-red-400 px-2 py-1 text-xs justify-center">
+            {{ config["error"] }}
+        </div>
+        {% endif %}
+        <div class="flex grow-0 shrink-0  p-3 w-full bg-stone-800 border border-stone-600">
+            <form class="w-full" action="/script/{{ config['name'] }}", method='POST' enctype="multipart/form-data" onkeypress="handleSubmitForm(event)">
+                <input class="hidden" name="old-name" value="{{ config['oldName'] }}">
+                <div class="flex w-full flex-col gap-2">
+                    <div class="flex flow-col justify-center items-center {% if not config["oldName"] or config["oldName"] == "" %} hidden {% endif %}" id="log-spinner" role="status">
+                        <svg aria-hidden="true" class="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/>
+                            <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/>
+                        </svg>
+                        <span class="sr-only">Loading...</span>
                     </div>
-                </div>
-                <div class="pt-4 pb-1 flex w-full flex-none grow-0 shrink-0 text-blue-400">Environment variables</div>
-                <div id='env-list' class="flex flex-col w-full gap-2">
-                    {% for env in config['environment'] %}
-                        <div class="w-full flex flex-row gap-4 justify-center items-center">
-                            <input style="font-family: monospace" class="env-name flex grow shrink px-2 h-8 bg-stone-900  border-stone-600 border text-xs" type="text" name="env_name" placeholder="VARIABLE" value="{{ env }}">
-                            <input style="font-family: monospace" class="env-value flex grow shrink px-2 h-8 bg-stone-900  border-stone-600 border text-xs" type="text" name="env_value" placeholder="VALUE" value="{{ config['environment'][env] }}">
-                            <button type="button w-4" onclick="this.parentElement.remove();">
+                    <div id="log-header" class="pb-1 flex w-full flex-none grow-0 shrink-0 text-blue-400 hidden">Log</div>
+                    <textarea id="log-textarea" disabled="true" class="border border-stone-500 flex w-full bg-stone-900 p-2 text-xs hidden" style="font-family: monospace" rows='6'></textarea>
+                    <div class="flex flex-row w-full h-4" id="refresh-container">
+                        <div class="flex grow shrink h-full"></div>
+                        <div class="flex shrink-0 grow-0 h-full text-xs pr-4 hidden" id="refresh-text">Refresh in 10s</div>
+                    </div>
+                    <div class="pb-1 flex w-full flex-none grow-0 shrink-0 text-blue-400">General</div>
+                    <div class="flex w-full flex-none grow-0 shrink-0 flex-row justify-center items-center gap-4 pl-4">
+                        <label for="name" class="flex flex-none shrink-0 grow-0 w-20 text-sm">Name</label>
+                        <input style="font-family: monospace" class="flex grow w-full shrink px-2 h-8 bg-stone-900  border-stone-600 border text-xs" type="text" id="name" name="name" placeholder="e.g. myscript (only characters, numbers and underscores allowed)" value="{{ config['name'] }}" pattern="[a-zA-Z0-9_\-]+" required onkeyup="updateName(this)">
+                    </div>
+                    <div class="flex w-full flex-none grow-0 shrink-0 flex-row justify-center items-center gap-4 pl-4">
+                        <label for="entrypoint" class="flex flex-none shrink-0 grow-0 w-20 text-sm">Entrypoint</label>
+                        <input style="font-family: monospace" class="flex grow w-full shrink px-2 h-8 bg-stone-900  border-stone-600 border text-xs" type="text" id="entrypoint" name="entrypoint" placeholder="e.g. myscript.py" value="{{ config['entryPoint'] }}">
+                    </div>
+                    <div class="flex w-full flex-none grow-0 shrink-0 flex-row flex-wrap items-center gap-4 pl-4">
+                        <label for="cli-args" class="flex flex-none shrink-0 grow-0 w-20 text-sm">Arguments</label>
+                        <input style="font-family: monospace" class="flex grow min-w-8 shrink px-2 h-8 bg-stone-900  border-stone-600 border text-xs" type="text" id="cli-args" name="cli-args" placeholder="Specify an argument and press enter to confirm." value="{{ config["arguments"] }}">
+                    </div>
+                    <div class="flex w-full flex-none grow-0 shrink-0 flex-row justify-center items-center gap-4 pl-4">
+                        <label for="interpreter" class="flex flex-none shrink-0 grow-0 w-20 text-sm">Interpreter</label>
+                        <select style="font-family: monospace" class="flex grow w-full shrink px-2 h-8 bg-stone-900  border-stone-600 border text-xs" id="interpreter" name="interpreter">
+                            {% for interpreter in interpreters %}
+                                {% if 'interpreter' in config and config['interpreter']['name'] == interpreter %}
+                                <option value="{{ interpreter }}" class="text-sm" selected="selected">{{ interpreter }}</option>
+                                {% else %}
+                                    <option value="{{ interpreter }}" class="text-sm">{{ interpreter }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% if config['files'] %}
+                    <div class="pt-4 pb-1 flex w-full flex-none grow-0 shrink-0 text-blue-400">Stored files</div>
+                    <div class="flex flex-row w-full flex-wrap justify-start gap-2">
+                        {% for f in config['files'] %}
+                        <div class="flex flex-row h-8 shrink-0 items-center bg-stone-900  border border-stone-600 justify-center px-3 gap-2">
+                            <button type='button' class='w-4 h-full' onclick="toggleOutlineFile(this, '{{ f }}')">
                                 <svg class="w-4 h-4 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 20">
                                     <path d="M17 4h-4V2a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v2H1a1 1 0 0 0 0 2h1v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V6h1a1 1 0 1 0 0-2ZM7 2h4v2H7V2Zm1 14a1 1 0 1 1-2 0V8a1 1 0 0 1 2 0v8Zm4 0a1 1 0 0 1-2 0V8a1 1 0 0 1 2 0v8Z"/>
                                 </svg>
                             </button>
+                            <input style="font-family: monospace" class="text-sm hidden" type="text" name="file-remove" value="">
+                            <div class='text-xs'>{{ f }}</div>
                         </div>
-                    {% endfor %}
-                </div>
-                <div class="w-full flex flex-row gap-4 h-10 pt-2">
-                    <button type='button' onclick="addEnvVariable()"
-                        class="flex flex-row basis-1/2 grow h-full  bg-stone-900 justify-center items-center hover:bg-blue-900 border border-stone-600 gap-2" >
-                        <svg class="w-3 h-3 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16"/>
-                        </svg>
-                        <div class='text-sm'>Add environment variable</div>
-                    </button>
-                    <button type='button' onclick="clickNextSibling(this)"
-                        class="flex flex-row grow basis-1/2 h-full  bg-stone-900 justify-center items-center hover:bg-blue-900 border border-stone-600 gap-2" >
-                        <svg class="w-3 h-3 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16"/>
-                        </svg>
-                        <div class='text-sm'>Upload .env file</div>
-                    </button>
-                    <input style="font-family: monospace" type="file" class='hidden' onchange="addEnvVariablesFromFile(this)">
-                    <div class="w-4">
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <div class="pt-4 pb-1 flex w-full flex-none grow-0 shrink-0 text-blue-400">Upload files</div>
+                    <div class="flex flex-row w-full flex-none grow-0 shrink-0 h-14 gap-2">
+                        <button id='upload-btn' type='button' onclick="clickNextSibling(this)"
+                            class="flex flex-row grow h-full  bg-stone-900 justify-center items-center hover:bg-blue-900 border border-stone-600 gap-2" >
+                            <div class="flex flex-row w-10 h-10 items-center justify-center">
+                                <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="m14.707 4.793-4-4a1 1 0 0 0-1.416 0l-4 4a1 1 0 1 0 1.416 1.414L9 3.914V12.5a1 1 0 0 0 2 0V3.914l2.293 2.293a1 1 0 0 0 1.414-1.414Z"/>
+                                    <path d="M18 12h-5v.5a3 3 0 0 1-6 0V12H2a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2Zm-3 5a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"/>
+                                </svg>
+                            </div>
+                            <div>Upload</div>
+                        </button>
+                        <input style="font-family: monospace" type="file" name="files" id="files" class='hidden' multiple='multiple' onchange="updateFileList()">
+                    </div>
+                    <div class="flex flex-row w-full flex-wrap justify-start gap-2" id='files-list'></div>
+                    <div class="pt-4 pb-1 flex w-full flex-none grow-0 shrink-0 text-blue-400">Run Commands</div>
+                    <div class="flex flex-row w-full flex-none grow-0 shrink-0">
+                        <div class="w-full">
+                            <textarea name='install-script' id="install-script" style="font-family: monospace" class="border border-white  flex w-full bg-stone-900 p-2 text-xs" rows='8' placeholder="Run bash commands in the script project directory, e.g. to unpack an uploaded ZIP archive..." value="{{ config['install'] if 'install' in config and config['install'] != None else '' }}">{{ config['install'] if 'install' in config and config['install'] != None else '' }}</textarea>
+                        </div>
+                    </div>
+                    <div class="pt-4 pb-1 flex w-full flex-none grow-0 shrink-0 text-blue-400">Environment variables</div>
+                    <div id='env-list' class="flex flex-col w-full gap-2">
+                        {% for env in config['environment'] %}
+                            <div class="w-full flex flex-row gap-4 justify-center items-center">
+                                <input style="font-family: monospace" class="env-name flex grow shrink px-2 h-8 bg-stone-900  border-stone-600 border text-xs" type="text" name="env_name" placeholder="VARIABLE" value="{{ env }}">
+                                <input style="font-family: monospace" class="env-value flex grow shrink px-2 h-8 bg-stone-900  border-stone-600 border text-xs" type="text" name="env_value" placeholder="VALUE" value="{{ config['environment'][env] }}">
+                                <button type="button w-4" onclick="this.parentElement.remove();">
+                                    <svg class="w-4 h-4 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 20">
+                                        <path d="M17 4h-4V2a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v2H1a1 1 0 0 0 0 2h1v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V6h1a1 1 0 1 0 0-2ZM7 2h4v2H7V2Zm1 14a1 1 0 1 1-2 0V8a1 1 0 0 1 2 0v8Zm4 0a1 1 0 0 1-2 0V8a1 1 0 0 1 2 0v8Z"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <div class="w-full flex flex-row gap-4 h-10 pt-2">
+                        <button type='button' onclick="addEnvVariable()"
+                            class="flex flex-row basis-1/2 grow h-full  bg-stone-900 justify-center items-center hover:bg-blue-900 border border-stone-600 gap-2" >
+                            <svg class="w-3 h-3 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16"/>
+                            </svg>
+                            <div class='text-sm'>Add environment variable</div>
+                        </button>
+                        <button type='button' onclick="clickNextSibling(this)"
+                            class="flex flex-row grow basis-1/2 h-full  bg-stone-900 justify-center items-center hover:bg-blue-900 border border-stone-600 gap-2" >
+                            <svg class="w-3 h-3 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16"/>
+                            </svg>
+                            <div class='text-sm'>Upload .env file</div>
+                        </button>
+                        <input style="font-family: monospace" type="file" class='hidden' onchange="addEnvVariablesFromFile(this)">
+                        <div class="w-4">
+                        </div>
+                    </div>
+                    <div class="pt-4 pb-1 flex w-full flex-none grow-0 shrink-0 text-blue-400">Execution scheduling</div>
+                    <div class="flex flex-row w-full flex-none grow-0 shrink-0 h-14 gap-2">
+                        <input style="font-family: monospace" class="hidden" name="scheduling" value="">
+                        <button id='crontab-btn' type='button' onclick="showCrontabDetails(this)"
+                            class="flex flex-row grow h-full  bg-stone-900 justify-center items-center hover:bg-blue-900 border border-stone-600 gap-2" >
+                            <div>Crontab</div>
+                        </button>
+                        <button id='systemd-btn' type='button' onclick="showSystemdDetails(this)"
+                            class="flex flex-row grow h-full  bg-stone-900 justify-center items-center hover:bg-blue-900 border border-stone-600 gap-2" >
+                            <div>Systemd</div>
+                        </button>
+                        <button id='none-btn' type='button' onclick="showNoDetails(this)"
+                            class="flex flex-row grow h-full  bg-stone-900 justify-center items-center hover:bg-blue-900 border border-stone-600 gap-2" >
+                            <div>None</div>
+                        </button>
+                    </div>
+                    <div id="execution-content" class="flex flex-col w-full">
                     </div>
                 </div>
-                <div class="pt-4 pb-1 flex w-full flex-none grow-0 shrink-0 text-blue-400">Execution scheduling</div>
-                <div class="flex flex-row w-full flex-none grow-0 shrink-0 h-14 gap-2">
-                    <input style="font-family: monospace" class="hidden" name="scheduling" value="">
-                    <button id='crontab-btn' type='button' onclick="showCrontabDetails(this)"
-                        class="flex flex-row grow h-full  bg-stone-900 justify-center items-center hover:bg-blue-900 border border-stone-600 gap-2" >
-                        <div>Crontab</div>
-                    </button>
-                    <button id='systemd-btn' type='button' onclick="showSystemdDetails(this)"
-                        class="flex flex-row grow h-full  bg-stone-900 justify-center items-center hover:bg-blue-900 border border-stone-600 gap-2" >
-                        <div>Systemd</div>
-                    </button>
-                    <button id='none-btn' type='button' onclick="showNoDetails(this)"
-                        class="flex flex-row grow h-full  bg-stone-900 justify-center items-center hover:bg-blue-900 border border-stone-600 gap-2" >
-                        <div>None</div>
-                    </button>
-                </div>
-                <div id="execution-content" class="flex flex-col w-full">
-                </div>
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
-</div>
+    <div id="script-submit-spinner" class="hidden absolute top-0 left-0 h-full w-full flex flex-row justify-center justify-items-center opacity-80">
+        <div class='flex flex-col w-full h-full justify-center items-center gap-4 bg-stone-900'>
+            <svg aria-hidden="true" class="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/>
+                <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/>
+            </svg>
+            <span class="sr-only">Loading...</span>
+        </div>
+    </div>
+<div>
 {% endblock %}
