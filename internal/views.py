@@ -11,6 +11,12 @@ from internal.appl import app
 SYSTEM_SHELL: Shell = Shell(working_directory='/')
 
 SYSTEMD_CONFIG = {
+    'none': [
+        {
+            'name': "InitialState",
+            "options": ["enabled", "started"]
+        },
+    ],
     'Unit': [
         {
             'name': "Description",
@@ -426,8 +432,8 @@ def upload(id):
         return render_template('script.html', username=current_user.id, config=config, systemd=SYSTEMD_CONFIG, scripts=scripts, interpreters=app.custom_config['interpreters'])
 
     # Check if relative path leaves root directory
-    entry_point_path = os.path.abspath(os.path.join(workspace, config['name'], config['entryPoint']))
-    if not entry_point_path.startswith(os.path.join(workspace, config['name'])):
+    entry_point_path = os.path.abspath(os.path.join(workspace, config['name'], config['entryPoint'])) if config['entryPoint'] != '' else ''
+    if entry_point_path != "" and not entry_point_path.startswith(os.path.join(workspace, config['name'])):
         config['error'] = 'Entry point is invalid. You can not leave the root directory.'
         return render_template('script.html', username=current_user.id, config=config, systemd=SYSTEMD_CONFIG, scripts=scripts, interpreters=app.custom_config['interpreters'])
 
@@ -492,7 +498,7 @@ def upload(id):
 
     # Store uploaded files
     for f in config['files']:
-        filepath = os.path.join(new_script_dir, f)
+        filepath = os.path.join(new_script_dir, f.filename)
         f.save(filepath)
         shell.run([['chown', '-R', f"{config['username']}:{config['username']}", filepath]])
     config['files'] = None
@@ -514,6 +520,8 @@ def upload(id):
     if config['scheduling'] == "systemd":
         with open(new_systemd_file, 'w') as f:
             for entry in SYSTEMD_CONFIG:
+                if entry == "none":
+                    continue
                 f.write(f"[{entry}]\n")
                 if entry == "Service":
                     f.write(f"User={config['username']}\n")
@@ -535,6 +543,12 @@ def upload(id):
         shell.run([
             ['systemctl', 'enable', new_systemd_service],
         ])
+        if config["systemd"]["none"]["initialstate"] == "started":
+            shell.run([
+                ['systemctl', 'start', new_systemd_service],
+            ])
+        config["systemd"]["none"]["initialstate"] = "enabled"
+
 
     # Setup crontab entry
     elif config['scheduling'] == 'crontab':

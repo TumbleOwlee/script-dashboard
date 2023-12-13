@@ -256,7 +256,11 @@
                     <path d="M17.989 6.124a6.5 6.5 0 0 0-12.495-2.1A5 5 0 0 0 6 14h4V8.414l-.293.293a1 1 0 0 1-1.414-1.414l2-2a1 1 0 0 1 1.414 0l2 2a1 1 0 1 1-1.414 1.414L12 8.414V14h5a4 4 0 0 0 .989-7.876Z"/>
                 </svg>
             </div>
-            <div>Save / Update</div>
+            {% if not config['name'] or config['name'] == '' %}
+            <div>Submit</div>
+            {% else %}
+            <div>Update</div>
+            {% endif %}
         </button>
         <input style="font-family: monospace" type="submit" class='hidden'/>
     </div>
@@ -297,7 +301,11 @@
                     <path d="M17.989 6.124a6.5 6.5 0 0 0-12.495-2.1A5 5 0 0 0 6 14h4V8.414l-.293.293a1 1 0 0 1-1.414-1.414l2-2a1 1 0 0 1 1.414 0l2 2a1 1 0 1 1-1.414 1.414L12 8.414V14h5a4 4 0 0 0 .989-7.876Z"/>
                 </svg>
             </div>
-            <div>Save / Update</div>
+            {% if not config['name'] or config['name'] == '' %}
+            <div>Submit</div>
+            {% else %}
+            <div>Update</div>
+            {% endif %}
         </button>
         <input type="submit" class='hidden'/>
     </div>
@@ -307,7 +315,9 @@
     <div class="flex flex-col w-full bg-stone-900  border border-stone-600 p-4 gap-2 items-center">
         <div class="pb-2 flex w-full flex-none grow-0 shrink-0 text-blue-400">Service file</div>
         {% for entry in systemd %}
+            {% if entry != "none" %}
             <div class="pl-4 p-2 flex w-full flex-none grow-0 shrink-0 text-blue-400 text-sm">{{ entry }}</div>
+            {% endif %}
             {% for value in systemd[entry] %}
                 {% if 'placeholder' in value %}
                 <div class="flex w-full flex-none grow-0 shrink-0 flex-row gap-4 pl-4 items-center">
@@ -319,7 +329,7 @@
                     <label for="systemd-desc" class="flex flex-none shrink-0 grow-0 w-32 text-sm">{{ value["name"] }}</label>
                     <select style="font-family: monospace" class="flex grow w-full shrink px-2 h-8 bg-stone-900  border-stone-600 border text-xs" id="systemd-{{ value["name"].lower() }}" name="systemd-{{ value["name"].lower() }}">
                         {% for opt in value['options'] %}
-                            {% if 'systemd' in config and opt == config['systemd'][entry][value["name"].lower()] %}
+                            {% if 'systemd' in config and entry in config['systemd'] and opt == config['systemd'][entry][value["name"].lower()] %}
                                 <option value="{{ opt }}" class="text-sm" selected="selected">{{ opt }}</option>
                             {% else %}
                                 <option value="{{ opt }}" class="text-sm">{{ opt }}</option>
@@ -340,7 +350,11 @@
                     <path d="M17.989 6.124a6.5 6.5 0 0 0-12.495-2.1A5 5 0 0 0 6 14h4V8.414l-.293.293a1 1 0 0 1-1.414-1.414l2-2a1 1 0 0 1 1.414 0l2 2a1 1 0 1 1-1.414 1.414L12 8.414V14h5a4 4 0 0 0 .989-7.876Z"/>
                 </svg>
             </div>
-            <div>Save / Update</div>
+            {% if not config['name'] or config['name'] == '' %}
+            <div>Submit</div>
+            {% else %}
+            <div>Update</div>
+            {% endif %}
         </button>
         <input type="submit" class='hidden'/>
     </div>

@@ -2,15 +2,17 @@ workspace: /opt/script-management/
 crontab: /etc/cron.d/
 systemd: /etc/systemd/system/
 interpreters:
+  Bash:
+    command: /usr/bin/bash
+  Flask:
+    command: /usr/bin/python3 -m flask
+  Lua:
+    command: /usr/bin/lua
+  Native:
+    command:
   Python2:
     command: /usr/bin/python2
   Python3:
     command: /usr/bin/python3
-  Bash:
-    command: /usr/bin/bash
-  Lua:
-    command: /usr/bin/lua
   RScript:
     command: /usr/bin/rscript
-  Native:
-    command:
