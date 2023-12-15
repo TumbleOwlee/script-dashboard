@@ -1,4 +1,4 @@
-workspace: /opt/script-management/
+workspace: /opt/dashboard/
 crontab: /etc/cron.d/
 systemd: /etc/systemd/system/
 interpreters:
