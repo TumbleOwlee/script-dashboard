@@ -378,6 +378,8 @@ def get_config_from_form(request):
                 var = value["name"].lower()
                 form_value = request.form.get(f"systemd-{var}")
                 if 'options' in value and form_value not in value['options']:
+                    if status is True:
+                        config['error'] = f"Invalid value for '{value['name']}'. One of {value['options']} expected."
                     status = False
                 else:
                     config['systemd'][entry][var] = request.form.get(f"systemd-{var}")
@@ -393,6 +395,7 @@ def get_config_from_form(request):
     elif config['scheduling'] == 'none':
         pass
     else:
+        config['error'] = "Invalid value for 'scheduling'. You have to activate either 'Crontab', 'Systemd' or 'None'."
         status = False
 
     if not re.search('^[a-zA-Z0-9_\\-]+$', config['name']):
@@ -425,7 +428,6 @@ def upload(id):
     scripts = list_dir(workspace)
 
     if not status:
-        config['error'] = 'Invalid form data provided. Please check the inputs.'
         return render_template('script.html', username=current_user.id, config=config, systemd=SYSTEMD_CONFIG, scripts=scripts, interpreters=app.custom_config['interpreters'])
 
     if config['oldName'] is not None and id != config['oldName'] and id.lower() != config['oldName'].lower() and id.lower() in [s.lower() for s in scripts]:

@@ -233,7 +233,7 @@
 
 <template id="no-details">
     <div class='pt-4 w-full'>
-        <button type='button' onclick="removeClass('#script-submit-spinner', 'hidden'); clickNextSibling(this)"
+        <button type='button' onclick="clickNextSibling(this); removeClass('#script-submit-spinner', 'hidden');"
             class="flex flex-row grow h-full  bg-stone-900 justify-center items-center hover:bg-blue-900 border border-stone-600 gap-2 w-full" >
             <div class="flex flex-row w-10 h-10 items-center justify-center">
                 <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 21 16">
@@ -278,7 +278,7 @@
         </div>
     </div>
     <div class='pt-4 w-full'>
-        <button type='button' onclick="removeClass('#script-submit-spinner', 'hidden'); clickNextSibling(this);"
+        <button type='button' onclick="clickNextSibling(this); removeClass('#script-submit-spinner', 'hidden');"
             class="flex flex-row grow h-full  bg-stone-900 justify-center items-center hover:bg-blue-900 border border-stone-600 gap-2 w-full" >
             <div class="flex flex-row w-10 h-10 items-center justify-center">
                 <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 21 16">
@@ -407,7 +407,7 @@
                     <div class="pb-1 flex w-full flex-none grow-0 shrink-0 text-blue-400">General</div>
                     <div class="flex w-full flex-none grow-0 shrink-0 flex-row justify-center items-center gap-4 pl-4">
                         <label for="name" class="flex flex-none shrink-0 grow-0 w-20 text-sm">Name</label>
-                        <input style="font-family: monospace" class="flex grow w-full shrink px-2 h-8 bg-stone-900  border-stone-600 border text-xs" type="text" id="name" name="name" placeholder="e.g. myscript (only characters, numbers and underscores allowed)" value="{{ config['name'] }}" pattern="[a-zA-Z0-9_\-]+" required onkeyup="updateName(this)">
+                        <input style="font-family: monospace" class="flex grow w-full shrink px-2 h-8 bg-stone-900  border-stone-600 border text-xs" type="text" id="name" name="name" placeholder="e.g. myscript (only characters, numbers and underscores allowed)" value="{{ config['name'] }}" required onkeyup="updateName(this)">
                     </div>
                     <div class="flex w-full flex-none grow-0 shrink-0 flex-row justify-center items-center gap-4 pl-4">
                         <label for="executable" class="flex flex-none shrink-0 grow-0 w-20 text-sm">Executable</label>
