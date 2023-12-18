@@ -163,13 +163,10 @@
         get(url).then((data) => {
             const json = JSON.parse(data);
             const ids = ["#log-textarea", "#log-header", "#refresh-container", "#refresh-text"];
-            addClass("#log-spinner", "hidden");
             if (json.log != "") {
+                addClass("#log-spinner", "hidden");
                 select("#log-textarea").innerHTML = json.log;
                 ids.forEach((id) => { removeClass(id, "hidden"); });
-            } else {
-                select("#log-textarea").innerHTML = "";
-                ids.forEach((id) => { addClass(id, "hidden"); });
             }
         }).catch((err) => {});
     }
@@ -398,7 +395,7 @@
                         </div>
                         <div class="flex flex-row w-full h-4 gap-4 items-center" id="refresh-container">
                             <div class="flex grow shrink h-full"></div>
-                            <div class="flex shrink-0 grow-0 h-full text-xs hidden" id="refresh-text">Refresh in 10s</div>
+                            <div class="flex shrink-0 grow-0 h-full text-xs" id="refresh-text">Refresh in 10s</div>
                             <button type="button" class="flex grow-0 shrink-0 w-6 p-1 hover:text-blue-900 text-gray-800 dark:text-white" onclick="updateLog()">
                                 <svg class="w-4 h-4 animate-spin" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 20">
                                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 1v5h-5M2 19v-5h5m10-4a8 8 0 0 1-14.947 3.97M1 10a8 8 0 0 1 14.947-3.97"/>
@@ -413,8 +410,8 @@
                         <input style="font-family: monospace" class="flex grow w-full shrink px-2 h-8 bg-stone-900  border-stone-600 border text-xs" type="text" id="name" name="name" placeholder="e.g. myscript (only characters, numbers and underscores allowed)" value="{{ config['name'] }}" pattern="[a-zA-Z0-9_\-]+" required onkeyup="updateName(this)">
                     </div>
                     <div class="flex w-full flex-none grow-0 shrink-0 flex-row justify-center items-center gap-4 pl-4">
-                        <label for="entrypoint" class="flex flex-none shrink-0 grow-0 w-20 text-sm">Entrypoint</label>
-                        <input style="font-family: monospace" class="flex grow w-full shrink px-2 h-8 bg-stone-900  border-stone-600 border text-xs" type="text" id="entrypoint" name="entrypoint" placeholder="e.g. myscript.py" value="{{ config['entryPoint'] }}">
+                        <label for="executable" class="flex flex-none shrink-0 grow-0 w-20 text-sm">Executable</label>
+                        <input style="font-family: monospace" class="flex grow w-full shrink px-2 h-8 bg-stone-900  border-stone-600 border text-xs" type="text" id="executable" name="executable" placeholder="e.g. myscript.py" value="{{ config['executable'] }}">
                     </div>
                     <div class="flex w-full flex-none grow-0 shrink-0 flex-row flex-wrap items-center gap-4 pl-4">
                         <label for="cli-args" class="flex flex-none shrink-0 grow-0 w-20 text-sm">Arguments</label>

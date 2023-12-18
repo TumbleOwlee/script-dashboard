@@ -256,7 +256,7 @@ def log(id):
                 returncode, output = SYSTEM_SHELL.check_output(['journalctl', '-n', '100', '-u', service_file.lower()])
                 return {'log': output}
             else:
-                output_file = os.path.join(script_dir, '.env', 'output.log')
+                output_file = os.path.join(script_dir, 'output.log')
                 returncode, output = SYSTEM_SHELL.check_output(['tail', '-n', '100', output_file])
                 return {'log': output}
     return {'log': ''}
@@ -326,9 +326,9 @@ def execute(id):
                     output = output.replace('\n', '')
                 if output != 'active':
                     shell = Shell(working_directory=working_dir, env=config['environment'], log_dir=os.path.join(working_dir, '.env'))
-                    ret = shell.run([['bash', script]])
+                    ret = shell.run([['su', '-', username, '-c', f"bash {script}"]])
                     if ret != 0:
-                        config['error'] = 'Execution failed. Check configuration and/or upload a new version.'
+                        config['error'] = f"Execution failed. Check configuration and/or upload a new version. su - {username} -c \"bash {script}\""
             except subprocess.TimeoutExpired:
                 config['error'] = 'Execution timed out. All manual execution has a timeout of 5 seconds.'
             config['files'] = list_files(working_dir)
@@ -356,7 +356,7 @@ def get_config_from_form(request):
         'username': current_user.id,
         'name': request.form.get('name'),
         'oldName': request.form.get('old-name'),
-        'entryPoint': request.form.get('entrypoint'),
+        'executable': request.form.get('executable'),
         'interpreter': {
             'name': request.form.get('interpreter'),
             'command': app.custom_config['interpreters'][request.form.get('interpreter')]['command']
@@ -376,7 +376,11 @@ def get_config_from_form(request):
             config['systemd'][entry] = dict()
             for value in SYSTEMD_CONFIG[entry]:
                 var = value["name"].lower()
-                config['systemd'][entry][var] = request.form.get(f"systemd-{var}")
+                form_value = request.form.get(f"systemd-{var}")
+                if 'options' in value and form_value not in value['options']:
+                    status = False
+                else:
+                    config['systemd'][entry][var] = request.form.get(f"systemd-{var}")
 
     elif config['scheduling'] == 'crontab':
         config['crontab'] = {
@@ -420,6 +424,10 @@ def upload(id):
     workspace = os.path.join(app.custom_config['workspace'], config['username'])
     scripts = list_dir(workspace)
 
+    if not status:
+        config['error'] = 'Invalid form data provided. Please check the inputs.'
+        return render_template('script.html', username=current_user.id, config=config, systemd=SYSTEMD_CONFIG, scripts=scripts, interpreters=app.custom_config['interpreters'])
+
     if config['oldName'] is not None and id != config['oldName'] and id.lower() != config['oldName'].lower() and id.lower() in [s.lower() for s in scripts]:
         config['error'] = 'Specified name is already taken. Please change it and try again.'
         return render_template('script.html', username=current_user.id, config=config, systemd=SYSTEMD_CONFIG, scripts=scripts, interpreters=app.custom_config['interpreters'])
@@ -428,14 +436,13 @@ def upload(id):
         config['error'] = 'Specified name is already taken. Please change it and try again.'
         return render_template('script.html', username=current_user.id, config=config, systemd=SYSTEMD_CONFIG, scripts=scripts, interpreters=app.custom_config['interpreters'])
 
-    if not status:
-        config['error'] = 'Invalid form data provided. Please check the inputs.'
-        return render_template('script.html', username=current_user.id, config=config, systemd=SYSTEMD_CONFIG, scripts=scripts, interpreters=app.custom_config['interpreters'])
-
     # Check if relative path leaves root directory
-    entry_point_path = os.path.abspath(os.path.join(workspace, config['name'], config['entryPoint'])) if config['entryPoint'] != '' else ''
-    if entry_point_path != "" and not entry_point_path.startswith(os.path.join(workspace, config['name'])):
+    executable_path = os.path.abspath(os.path.join(workspace, config['name'], config['executable'])) if config['executable'] != '' else ''
+    if executable_path != "" and not executable_path.startswith(os.path.join(workspace, config['name'])):
         config['error'] = 'Entry point is invalid. You can not leave the root directory.'
+        return render_template('script.html', username=current_user.id, config=config, systemd=SYSTEMD_CONFIG, scripts=scripts, interpreters=app.custom_config['interpreters'])
+    elif (config['interpreter']['name'] in ["Native", "System"]) and executable_path == "":
+        config['error'] = "Interpreter type 'Native' and 'System' require that you specify an executable."
         return render_template('script.html', username=current_user.id, config=config, systemd=SYSTEMD_CONFIG, scripts=scripts, interpreters=app.custom_config['interpreters'])
 
     if "systemd" in config:
@@ -506,21 +513,26 @@ def upload(id):
 
     # Create execution script
     with open(os.path.join(env_dir, 'execute.sh'), 'w') as f:
-        output_file = os.path.join(env_dir, 'output.log')
+        output_file = os.path.join(new_script_dir, 'output.log')
         f.write("#!/bin/bash\n")
         f.write(f"cd {new_script_dir}\n")
         for e in config['environment']:
             f.write(f"export {e}={config['environment'][e]}\n")
         f.write('if [ "$1" == "service" ]; then\n')
         if config['interpreter']['name'] == "Native":
-            f.write(f"{entry_point_path} {config['arguments']} {config['service-args']} >>{output_file} 2>&1\n")
+            f.write(f"{executable_path} {config['arguments']} {config['service-args']} >>{output_file} 2>&1\n")
+        elif config['interpreter']['name'] == "System":
+            f.write(f"{config['executable']} {config['arguments']} {config['service-args']} >>{output_file} 2>&1\n")
         else:
-            f.write(f"{config['interpreter']['command']} {entry_point_path} {config['arguments']} {config['service-args']} >>{output_file} 2>&1\n")
+            f.write(f"{config['interpreter']['command']} {executable_path} {config['arguments']} {config['service-args']} >>{output_file} 2>&1\n")
         f.write('else\n')
         if config['interpreter']['name'] == "Native":
-            f.write(f"{entry_point_path} {config['arguments']} >>{output_file} 2>&1\n")
+            f.write(f"{executable_path} {config['arguments']} >>{output_file} 2>&1\n")
+        elif config['interpreter']['name'] == "System":
+            f.write(f"{config['executable']} {config['arguments']} >>{output_file} 2>&1\n")
         else:
-            f.write(f"{config['interpreter']['command']} {entry_point_path} {config['arguments']} >>{output_file} 2>&1\n")
+            f.write(f"{config['interpreter']['command']} {executable_path} {config['arguments']} >>{output_file} 2>&1\n")
+        f.write('fi\n')
         f.flush()
 
     # Setup systemd service file and start it
@@ -535,9 +547,9 @@ def upload(id):
                     for env in config['environment']:
                         f.write(f"Environment=\"{env}={config['environment'][env]}\"\n")
                     if config['interpreter']['name'] == "Native":
-                        f.write(f"ExecStart={entry_point_path} {config['arguments']} {config['service-args']}\n")
+                        f.write(f"ExecStart={executable_path} {config['arguments']} {config['service-args']}\n")
                     else:
-                        f.write(f"ExecStart={config['interpreter']['command']} {entry_point_path} {config['arguments']} {config['service-args']}\n")
+                        f.write(f"ExecStart={config['interpreter']['command']} {executable_path} {config['arguments']} {config['service-args']}\n")
                 for value in SYSTEMD_CONFIG[entry]:
                     if value["name"] == "WorkingDirectory":
                         working_dir = os.path.abspath(os.path.join(workspace, config['name'], config['systemd'][entry]['workingdirectory']))
@@ -557,7 +569,7 @@ def upload(id):
 
     # Setup crontab entry
     elif config['scheduling'] == 'crontab':
-        crontab_line = f"{config['crontab']['minute']} {config['crontab']['hour']} {config['crontab']['day']} {config['crontab']['month']} {config['crontab']['weekday']} \"sudo -u {config['username']} bash {env_dir}/execute.sh service\""
+        crontab_line = f"{config['crontab']['minute']} {config['crontab']['hour']} {config['crontab']['day']} {config['crontab']['month']} {config['crontab']['weekday']} {config['username']} bash {env_dir}/execute.sh service\n"
         env_crontab = os.path.join(env_dir, f"{config['username']}_{config['name']}_generated".lower())
         with open(env_crontab, 'w') as f:
             f.write(f"# Managed by Script Dashboard\n{crontab_line}")

@@ -16,3 +16,5 @@ interpreters:
     command: /usr/bin/python3
   RScript:
     command: /usr/bin/rscript
+  System:
+    command:
