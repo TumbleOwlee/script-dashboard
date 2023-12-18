@@ -1,25 +1,22 @@
 <!DOCTYPE html>
 <html lang="en" class="dark">
-
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard</title>
-  <link rel="stylesheet" href="{{url_for('static',filename='css/main.css')}}">
-  <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
-</head>
-
-<body class="dark:bg-slate-800 dark:text-white">
-<div class="h-screen flex items-center justify-center">
-    <div>
-        <h3 class="text-center font-mono text-8xl">
-            PAGE NOT FOUND
-        </h3>
-        <p class="text-center font-mono" style="padding: 0 10%">
-            Please check the URL. If you reached this site by using the supported navigation, please report the issue and include the steps you took. Thanks in advance.
-        </p>
-    </div>
-</div>
-</body>
-
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Dashboard</title>
+        <link rel="icon" href="{{url_for('static',filename='img/favicon.png')}}">
+        <link rel="stylesheet" href="{{url_for('static',filename='css/main.css')}}">
+        <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+    </head>
+    <body class="dark:bg-stone-900 dark:text-white">
+        <div class="h-screen flex flex-col items-center justify-center gap-4">
+            <div class="flex flex-row justify-center items-center w-full gap-4">
+                <img class="h-16" src="{{url_for('static',filename='img/favicon.png')}}">
+                <div class="flex flex-none grow-0 shrink-0 text-3xl text-blue-400 font-bold">Dashboard</div>
+            </div>
+            <div class="border border-stone-500 bg-stone-800 text-center rounded-md font-mono p-4 max-w-lg" style="font-family: monospace;">
+                You tried to reach an unavailable site. Please verify the URL and report the issue to the site administrators if you reached this site using the provided navigation.
+            </div>
+        </div>
+    </body>
 </html>

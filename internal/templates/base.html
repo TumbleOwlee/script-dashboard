@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}{% endblock %}</title>
+    <link rel="icon" href="{{url_for('static',filename='img/favicon.png')}}">
     <link rel="stylesheet" href="{{url_for('static',filename='css/main.css')}}">
     <link rel="preconnect" href="https://rsms.me/">
     <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
@@ -178,6 +179,7 @@
                 <!-- logo line -->
                 <div class="flex grow-0 flex-none w-full h-20 p-3">
                     <div class="snap-center flex flex-row h-full w-full gap-x-4 px-2 items-center justify-center">
+                        <img class="h-20" src="{{url_for('static',filename='img/favicon.png')}}">
                         <div>
                             <p class="text-3xl font-bold text-blue-400">Dashboard</p>
                             <p class="text-center text-sm text-stone-300">Version 0.1.0</p>
