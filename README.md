@@ -15,3 +15,25 @@ Exchange the values for host and port as required. Also if available and possibl
 **DO NOT USE THE TEST CERTIFICATES OF THIS REPOSITORY!**
 
 Additionally, you can run it as a `systemd` managed service using the provided service file template. Just exchange the working directory entry for a valid one and place it in `/etc/systemd/system/`.
+
+## Illustations
+
+### Login Page
+
+![Login](images/login.png)
+
+### Create Script
+
+![Create](images/create.png)
+
+### Configure Systemd
+
+![Systemd](images/systemd.png)
+
+### Edit Script
+
+![Edit](images/edit.png)
+
+### NotFound Page
+
+![NotFound](images/notfound.png)
