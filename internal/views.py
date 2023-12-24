@@ -8,7 +8,7 @@ from flask import render_template, request, redirect, url_for, send_from_directo
 from flask_login import login_required, current_user
 from internal.appl import app
 
-SYSTEM_SHELL: Shell = Shell(working_directory='/')
+SYSTEM_SHELL: Shell = Shell(working_directory='/', no_log=True)
 
 SYSTEMD_CONFIG = {
     'none': [
