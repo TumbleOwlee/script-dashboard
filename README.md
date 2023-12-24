@@ -28,6 +28,8 @@ Currently `crontab` and `systemd` are supported for execution handling. Besides 
 
 ## Illustations
 
+These images may not be up-to-date.
+
 ### Login Page
 
 ![Login](images/login.png)
