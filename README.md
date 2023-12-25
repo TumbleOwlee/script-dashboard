@@ -2,7 +2,7 @@
 
 # Introduction
 
-This repository contains a simple script management dashboard created using [Flask](https://flask.palletsprojects.com/en/3.0.x/) and [Tailwindcss](https://tailwindcss.com/). It's main purpose is to allow to easily install and monitor scripts on a given host with `crontab` or `systemd` integration without the need to use a SSH and SCP to deploy anything.
+This repository contains a simple script management dashboard created using [Flask](https://flask.palletsprojects.com/en/3.0.x/) and [Tailwindcss](https://tailwindcss.com/). It's main purpose is to allow to easily install and monitor scripts on a given host with `crontab` or `systemd` integration without the need to use `ssh` and `scp` to deploy anything.
 
 ## Quickstart
 
