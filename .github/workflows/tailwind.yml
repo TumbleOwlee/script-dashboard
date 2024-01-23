@@ -19,7 +19,7 @@ jobs:
 
       - name: Run tailwindcss
         run: |
-          apt install -y npm
+          sudo apt install -y npm
           npm install -D tailwindcss
           cd internal/static
           npx tailwindcss -i src/style.css -o css/main.css
