@@ -1,0 +1,26 @@
+name: Black Formatter
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  formatter:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run black formatter
+        run: |
+          sudo apt install -y python3 python3-pip
+          pip install git+https://github.com/psf/black
+          find . -name "*.py" -exec python -m black {} \;
+
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: Apply black format
