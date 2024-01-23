@@ -1,4 +1,4 @@
-name: Merge SVN
+name: Tailwindcss
 
 on:
   push:
