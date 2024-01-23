@@ -5,13 +5,23 @@ from typing import List
 
 
 class Shell:
-    def __init__(self, working_directory: str, env: dict | None = dict(), log_dir: str | None = None, no_log: bool = False) -> None:
+    def __init__(
+        self,
+        working_directory: str,
+        env: dict | None = dict(),
+        log_dir: str | None = None,
+        no_log: bool = False,
+    ) -> None:
         self.working_directory: str = working_directory
         if not no_log:
             if log_dir is None:
-                self.log: io.TextIOWrapper = open(os.path.join(working_directory, 'commands.log'), 'a')
+                self.log: io.TextIOWrapper = open(
+                    os.path.join(working_directory, "commands.log"), "a"
+                )
             else:
-                self.log: io.TextIOWrapper = open(os.path.join(log_dir, 'commands.log'), 'a')
+                self.log: io.TextIOWrapper = open(
+                    os.path.join(log_dir, "commands.log"), "a"
+                )
         else:
             self.log = None
         self.env = env
@@ -25,9 +35,16 @@ class Shell:
                     self.log.write(f"[!] Run command: {cmd}\n")
                     self.log.flush()
 
-                p: subprocess.CompletedProcess[str] = subprocess.run(cmd, stdin=subprocess.DEVNULL,
-                                                                     stdout=self.log,
-                                                                     stderr=self.log, cwd=self.working_directory, env=env, capture_output=False, timeout=30)
+                p: subprocess.CompletedProcess[str] = subprocess.run(
+                    cmd,
+                    stdin=subprocess.DEVNULL,
+                    stdout=self.log,
+                    stderr=self.log,
+                    cwd=self.working_directory,
+                    env=env,
+                    capture_output=False,
+                    timeout=30,
+                )
                 if p.returncode != 0:
                     return p.returncode
             except FileNotFoundError:
@@ -38,13 +55,15 @@ class Shell:
         env = os.environ.copy()
         env = {**env, **self.env}
         returncode: int = 0
-        output: str = ''
+        output: str = ""
         try:
             if self.log is not None:
                 self.log.write(f"[!] Run command: {command}\n")
                 self.log.flush()
 
-            output = subprocess.check_output(command, timeout=30, text=True, cwd=self.working_directory, env=env)
+            output = subprocess.check_output(
+                command, timeout=30, text=True, cwd=self.working_directory, env=env
+            )
         except subprocess.CalledProcessError as e:
             returncode = e.returncode
             output = e.output

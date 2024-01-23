@@ -1,5 +1,12 @@
 from flask import render_template, request, redirect, url_for
-from flask_login import LoginManager, UserMixin, login_user, login_required, current_user, logout_user
+from flask_login import (
+    LoginManager,
+    UserMixin,
+    login_user,
+    login_required,
+    current_user,
+    logout_user,
+)
 from internal.appl import app
 from simplepam import authenticate
 import pwd
@@ -25,7 +32,7 @@ def user_loader(userId):
 
 @login_manager.request_loader
 def request_loader(request):
-    userId = request.form.get('userId')
+    userId = request.form.get("userId")
     if userId not in users:
         return
 
@@ -33,30 +40,31 @@ def request_loader(request):
     return user
 
 
-@app.route('/login', methods=['GET', 'POST'])
+@app.route("/login", methods=["GET", "POST"])
 def login():
-
-    if request.method == 'GET':
+    if request.method == "GET":
         if current_user.is_authenticated:
-            return redirect(url_for('home'))
+            return redirect(url_for("home"))
         else:
-            return render_template('login.html', error='', userId=None)
+            return render_template("login.html", error="", userId=None)
 
-    userId = str(request.form['user'])
-    if authenticate(userId, str(request.form['password'])):
+    userId = str(request.form["user"])
+    if authenticate(userId, str(request.form["password"])):
         user = User(userId)
         login_user(user)
-        return redirect(url_for('home'))
+        return redirect(url_for("home"))
 
-    return render_template('login.html', error='Username and/or password was incorrect!', userId=userId)
+    return render_template(
+        "login.html", error="Username and/or password was incorrect!", userId=userId
+    )
 
 
-@app.route('/logout')
+@app.route("/logout")
 def logout():
     logout_user()
-    return redirect(url_for('login'))
+    return redirect(url_for("login"))
 
 
 @login_manager.unauthorized_handler
 def unauthorized_handler():
-    return redirect(url_for('login'))
+    return redirect(url_for("login"))
