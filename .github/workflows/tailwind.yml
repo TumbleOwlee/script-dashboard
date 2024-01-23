@@ -1,0 +1,29 @@
+name: Merge SVN
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run tailwindcss
+        run: |
+          apt install -y npm
+          npm install -D tailwindcss
+          cd internal/static
+          npx tailwindcss -i src/style.css -o css/main.css
+
+    - uses: stefanzweifel/git-auto-commit-action@v5
+      with:
+        commit_message: Update tailwindcss
