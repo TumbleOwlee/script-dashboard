@@ -31,13 +31,9 @@ def redirect_https():
 
 
 if __name__ == "__main__":
-    parser = ArgumentParser(
-        description="This is a script dashboard system accessible over the web browser."
-    )
+    parser = ArgumentParser(description="This is a script dashboard system accessible over the web browser.")
     req_group = parser.add_argument_group("required")
-    req_group.add_argument(
-        "--config", "-c", required=True, type=str, help="JSON configuration file."
-    )
+    req_group.add_argument("--config", "-c", required=True, type=str, help="JSON configuration file.")
     req_group.add_argument("--crt", required=True, type=str, help="Certificate file.")
     req_group.add_argument("--key", required=True, type=str, help="Private key file.")
     args = parser.parse_args()

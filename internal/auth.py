@@ -54,9 +54,7 @@ def login():
         login_user(user)
         return redirect(url_for("home"))
 
-    return render_template(
-        "login.html", error="Username and/or password was incorrect!", userId=userId
-    )
+    return render_template("login.html", error="Username and/or password was incorrect!", userId=userId)
 
 
 @app.route("/logout")

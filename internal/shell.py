@@ -15,13 +15,9 @@ class Shell:
         self.working_directory: str = working_directory
         if not no_log:
             if log_dir is None:
-                self.log: io.TextIOWrapper = open(
-                    os.path.join(working_directory, "commands.log"), "a"
-                )
+                self.log: io.TextIOWrapper = open(os.path.join(working_directory, "commands.log"), "a")
             else:
-                self.log: io.TextIOWrapper = open(
-                    os.path.join(log_dir, "commands.log"), "a"
-                )
+                self.log: io.TextIOWrapper = open(os.path.join(log_dir, "commands.log"), "a")
         else:
             self.log = None
         self.env = env
@@ -61,9 +57,7 @@ class Shell:
                 self.log.write(f"[!] Run command: {command}\n")
                 self.log.flush()
 
-            output = subprocess.check_output(
-                command, timeout=30, text=True, cwd=self.working_directory, env=env
-            )
+            output = subprocess.check_output(command, timeout=30, text=True, cwd=self.working_directory, env=env)
         except subprocess.CalledProcessError as e:
             returncode = e.returncode
             output = e.output
