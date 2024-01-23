@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  merge:
+  tailwindcss:
     runs-on: ubuntu-latest
     permissions:
       contents: write
