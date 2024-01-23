@@ -19,7 +19,7 @@ jobs:
         run: |
           sudo apt install -y python3 python3-pip
           pip install git+https://github.com/psf/black
-          find . -name "*.py" -exec python -m black {} \;
+          find . -name "*.py" -exec python -m black -l 120 {} \;
 
       - uses: stefanzweifel/git-auto-commit-action@v5
         with:
