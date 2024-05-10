@@ -361,9 +361,9 @@ def execute(id):
                     )
                     ret = shell.run([["su", "-", username, "-c", f"bash {script}"]])
                     if ret != 0:
-                        config[
-                            "error"
-                        ] = f'Execution failed. Check configuration and/or upload a new version. su - {username} -c "bash {script}"'
+                        config["error"] = (
+                            f'Execution failed. Check configuration and/or upload a new version. su - {username} -c "bash {script}"'
+                        )
             except subprocess.TimeoutExpired:
                 config["error"] = "Execution timed out. All manual execution has a timeout of 5 seconds."
             config["files"] = list_files(working_dir)
@@ -441,9 +441,9 @@ def get_config_from_form(request):
         status = False
 
     if not re.search("^[a-zA-Z0-9_\\-]+$", config["name"]):
-        config[
-            "error"
-        ] = "Name contains invalid characters. Only use characters, numerics, '-' and '_'. Whitespaces are not allowed."
+        config["error"] = (
+            "Name contains invalid characters. Only use characters, numerics, '-' and '_'. Whitespaces are not allowed."
+        )
         status = False
 
     return status, config
@@ -750,9 +750,9 @@ def upload(id):
                 interpreters=app.custom_config["interpreters"],
             )
     except subprocess.TimeoutExpired:
-        config[
-            "error"
-        ] = "Configuration updated but custom installation failed because timeout occurred. Execution limit is 5 seconds."
+        config["error"] = (
+            "Configuration updated but custom installation failed because timeout occurred. Execution limit is 5 seconds."
+        )
         config["install"] = install_content
         config["files"] = list_files(new_script_dir)
         return render_template(
