@@ -670,6 +670,8 @@ def upload(id):
                         f.write(f"Environment=\"{env}={config['environment'][env]}\"\n")
                     if config["interpreter"]["name"] == "Native":
                         f.write(f"ExecStart={executable_path} {config['arguments']} {config['service-args']}\n")
+                    elif config["interpreter"]["name"] == "System":
+                        f.write(f"ExecStart={config['executable']} {config['arguments']} {config['service-args']}\n")
                     else:
                         f.write(
                             f"ExecStart={config['interpreter']['command']} {executable_path} {config['arguments']} {config['service-args']}\n"
