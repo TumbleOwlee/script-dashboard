@@ -10,9 +10,11 @@ This repository contains a simple script management dashboard created using [Fla
 
 Just follow these steps to host the service (**don't make it publicly available**):
 
-1. Checkout the repository: `git clone https://github.com/TumbleOwlee/script-dashboard.git`
-2. Generate certificate: `openssl req -x509 -newkey rsa:4096 -nodes -out certificate/cert.pem -keyout certificate/key.pem -days 365`
-3. Start the service: `flask --app main --debug run -h 0.0.0.0 -p 5000 --cert certificate/cert.pem --key certificate/key.pem`
+1. Checkout the repository `git clone https://github.com/TumbleOwlee/script-dashboard.git` and change directory `cd script-dashboard`
+2. Create local python environment and activate it: `python3 -m venv ./pyenv && source ./pyenv/bin/activate`
+3. Install all dependencies: `python -m pip install flask flask-login pyyaml simplepam`
+4. Generate certificate: `openssl req -x509 -newkey rsa:4096 -nodes -out certificate/cert.pem -keyout certificate/key.pem -days 365`
+5. Start the service: `flask --app main --debug run -h 0.0.0.0 -p 5000 --cert certificate/cert.pem --key certificate/key.pem`
 
 Exchange the values for host and port as required. Also if available and possible, use a non-self-signed certificate. Preferably you also switch to a production ready web server as e.g. [Gunicorn](https://flask.palletsprojects.com/en/3.0.x/deploying/gunicorn/) or [Waitress](https://flask.palletsprojects.com/en/3.0.x/deploying/waitress/).
 
